@@ -8,11 +8,11 @@ tokens = ['USDC', 'USDT']
 
 # Unbalanced Genesis State
 genesis_states = get_genesis_state(
-    tokens, [1000.0, 890.0], [0.4, 0.6], [1.0, 1.0])
+    tokens, [100000.0, 89000.0], [0.4, 0.6], [1.0, 1.0])
 
 # Balanced Genesis State
-genesis_states = get_genesis_state(
-    tokens, [731.1041490513539, 1096.6562235770307], [0.4, 0.6], [1.0, 1.0])
+# genesis_states = get_genesis_state(
+#     tokens, [731.1041490513539, 1096.6562235770307], [0.4, 0.6], [1.0, 1.0])
 
 user_record = {
     "root": {
@@ -23,7 +23,7 @@ user_record = {
 psubs = [
     {
         "policies": {
-            'user_policy': policies.user_policy
+            'user_policy': policies.get_user_policy()
         },
         "variables": {
             state_updates.get_pool_state_upadate(user_record),
@@ -36,7 +36,7 @@ psubs = [
 sim_config = config_sim(
     {
         "N": 1,
-        "T": range(10),
+        "T": range(100),
     }
 )
 

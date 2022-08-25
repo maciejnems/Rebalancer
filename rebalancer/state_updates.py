@@ -15,10 +15,8 @@ def get_pool_state_upadate(user_record: dict):
         print("Input", input)
         action = input[ACTION]
         if action in rebalancer_actions:
-            result = rebalancer_actions[action](
-                s[POOL], user_record, *input[ARGUMENTS])
-            print("Result", result, user_record)
-            return (POOL, result)
+            return (POOL, rebalancer_actions[action](
+                s[POOL], user_record, *input[ARGUMENTS]))
         else:
             return (POOL, s[POOL])
 
