@@ -1,0 +1,7 @@
+ACTION = "action"
+ACTION_SWAP = "swap"
+ACTION_PROVIDE_LIQUIDITY = "provide-liquidity"
+ACTION_REMOVE_LIQUIDITY = "remove-liquidity"
+ARGUMENTS = "arguments"
+POOL = "pool"
+BLOCK = "block"
