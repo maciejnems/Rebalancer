@@ -6,8 +6,12 @@ import numpy as np
 MIN_PROFIT = 20
 ACTIONS = [ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION_SWAP]
 PROB = [6, 4, 90]
+
+# Distribution of liquidity providing and swaps based on fiat
 LIQUIDITY_MEAN = 10000
-LIQUIDITY_SPREAD = 4000
+LIQUIDITY_SPREAD = 5000
+SWAP_MEAN = 1000
+SWAP_SPREAD = 500
 
 
 def best_arbitrage(tokens):
@@ -40,7 +44,13 @@ def get_arbitrage(tokens):
         return None
 
 
-def provide_liquidity(users, tokens):
+def random_swap_tokens(tokens):
+    tokens = random.sample(list(tokens.values()), 2)
+    a_in = np.random.normal(SWAP_MEAN, SWAP_SPREAD) / tokens[0].price
+    return [a_in, tokens[0].name, tokens[1].name]
+
+
+def random_provide_liquidity(users, tokens):
     token = random.choice(list(tokens.values()))
     a_in = np.random.normal(LIQUIDITY_MEAN, LIQUIDITY_SPREAD) / token.price
     user = f'user-{len(users)}'
@@ -48,7 +58,7 @@ def provide_liquidity(users, tokens):
     return [a_in, token.name, user]
 
 
-def remove_liquidity(users, tokens):
+def random_remove_liquidity(users, tokens):
     if len(users) == 0:
         return [10, "USDC", "dummy"]
     user = random.choice(list(users.keys()))
@@ -60,20 +70,21 @@ def get_user_policy():
     users = {}
 
     def user_policy(_g, step, sH, s):
-        print("Step: ", s[BLOCK])
+        print("Step: ", s[BLOCK], s[POOL])
         action = random.choices(ACTIONS, weights=PROB, k=1)[0]
         if action is ACTION_PROVIDE_LIQUIDITY:
-            return {ACTION: ACTION_PROVIDE_LIQUIDITY, ARGUMENTS: provide_liquidity(users, s[POOL])}
+            return {ACTION: ACTION_PROVIDE_LIQUIDITY, ARGUMENTS: random_provide_liquidity(users, s[POOL])}
         elif action is ACTION_REMOVE_LIQUIDITY:
-            return {ACTION: ACTION_REMOVE_LIQUIDITY, ARGUMENTS: remove_liquidity(users, s[POOL])}
+            return {ACTION: ACTION_REMOVE_LIQUIDITY, ARGUMENTS: random_remove_liquidity(users, s[POOL])}
         elif action is ACTION_SWAP:
             arbitrage = get_arbitrage(s[POOL])
             if arbitrage is not None:
                 print("ARBITRAGE OPORTUNITY")
-                return {ACTION: ACTION_SWAP, ARGUMENTS: arbitrage}
-            else:
-                print("simple swap")
-                return {ACTION: ACTION_SWAP, ARGUMENTS: [1000.0, "USDC", "USDT"]}
+                if random.random() < 0.6:
+                    print("ARBITRAGE")
+                    return {ACTION: ACTION_SWAP, ARGUMENTS: arbitrage}
+            print("RANDOM swap")
+            return {ACTION: ACTION_SWAP, ARGUMENTS: random_swap_tokens(s[POOL])}
         else:
             return {}
     return user_policy
