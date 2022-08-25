@@ -7,6 +7,11 @@ def amount_out(a_in: float, t_in: Token, t_out: Token) -> float:
         (1-math.pow(t_in.balance / (t_in.balance +
          a_in), t_in.target_ratio / t_out.target_ratio))
 
+def amount_in(a_out: float, t_in: Token, t_out: Token) -> float:
+    return t_in.balance * \
+        (math.pow(t_out.balance / (t_out.balance -
+         a_out), t_out.target_ratio / t_in.target_ratio)-1)
+
 
 def target_balance_denominator(tokens: dict) -> float:
     return math.prod(math.pow(t.target_ratio/t.price, t.target_ratio) for t in tokens.values())
@@ -19,9 +24,7 @@ def target_balances(C: float, tokens: dict) -> dict:
 
 def target_balance(name: str, C: float, tokens: dict) -> float:
     TB = tokens[name].target_ratio * C / tokens[name].price
-    print(TB)
     prod = target_balance_denominator(tokens)
-    print(prod)
     return TB / prod
 
 
