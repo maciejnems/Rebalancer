@@ -15,8 +15,7 @@ SWAP_SPREAD = 500
 
 
 def best_arbitrage(tokens):
-    C = formulas.compute_C(tokens)
-    TB = formulas.target_balances(C, tokens)
+    TB = formulas.target_balances(tokens)
 
     differences = {name: tokens[name].price *
                    (TB[name] - tokens[name].balance) for name in tokens}

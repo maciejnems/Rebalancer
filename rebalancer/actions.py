@@ -10,11 +10,10 @@ def swap(state, user_register, a_in: float, t_in: str, t_out: str):
 
 
 def provide_liquidity(state, user_register, deposit: float, name: str, user: str):
-    C = formulas.compute_C(state)
-    supply = formulas.get_issued(name, deposit, C, state)
+    supply = formulas.get_issued(name, deposit, state)
     state[name].supply += supply
     target_ratios = formulas.new_target_ratios(
-        name, deposit, C, state)
+        name, deposit, state)
     if user not in user_register:
         user_register[user] = {}
     if name in user_register[user]:
@@ -34,10 +33,10 @@ def remove_liquidity(state, user_register, redeemed: float, name: str, user: str
     if redeemed is None:
         redeemed = user_register[user][name]
     if user_register[user][name] < redeemed:
-        print(f"User does not have enough founds. Tried to withdraw {redeemed}, has {user_register[user][name]}")
+        print(
+            f"User does not have enough founds. Tried to withdraw {redeemed}, has {user_register[user][name]}")
         return state
-    C = formulas.compute_C(state)
-    withdrawal = formulas.get_withdrawal(name, redeemed, C, state)
+    withdrawal = formulas.get_withdrawal(name, redeemed, state)
     if withdrawal > state[name].balance:
         print(f"Not enough tokens to withdraw {withdrawal} of token {name}")
         return state
@@ -45,7 +44,7 @@ def remove_liquidity(state, user_register, redeemed: float, name: str, user: str
     user_register[user][name] -= redeemed
     state[name].balance -= withdrawal
     target_ratios = formulas.new_target_ratios(
-        name, -withdrawal, C, state)
+        name, -withdrawal, state)
     for name, tr in target_ratios.items():
         state[name].target_ratio = tr
     return state
