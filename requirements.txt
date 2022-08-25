@@ -1,5 +1,5 @@
 cadCAD==0.4.28
-numpy==1.21.1
+numpy==1.22.0
 pandas==1.4.2
 tabulate==0.8.9
 pytest==7.1.2
