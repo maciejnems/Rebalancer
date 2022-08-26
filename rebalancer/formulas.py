@@ -3,8 +3,6 @@ import math
 
 
 def amount_out(a_in: float, t_in: Token, t_out: Token) -> float:
-    print(t_out.balance, (1 - math.pow(t_in.balance / (t_in.balance +
-                                                       a_in), t_in.target_ratio / t_out.target_ratio)))
     return t_out.balance * \
         (1-math.pow(t_in.balance / (t_in.balance +
          a_in), t_in.target_ratio / t_out.target_ratio))

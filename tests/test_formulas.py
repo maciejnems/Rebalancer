@@ -2,7 +2,6 @@ from unittest import TestCase
 
 from rebalancer import formulas
 from rebalancer.model import Token
-import numpy as np
 
 
 class TestFormulas(TestCase):
