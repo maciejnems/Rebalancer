@@ -1,6 +1,8 @@
 from rebalancer.model import Token
 import math
 
+SWAP_FEE = 0.05
+
 
 def amount_out(a_in: float, t_in: Token, t_out: Token) -> float:
     return t_out.balance * \
@@ -56,3 +58,10 @@ def get_issued(name: str, deposit: float, tokens: dict) -> float:
 def get_withdrawal(name: str, redeemed: float, tokens: dict) -> float:
     TB = target_balance(name, tokens)
     return redeemed * TB / tokens[name].supply
+
+
+def get_price_impact_loss(a_in: float, t_in: Token, t_out: Token):
+    a_out = amount_out(a_in, t_in, t_out) * (1 - SWAP_FEE)
+    price_impact_loss = (a_out - (1 - SWAP_FEE) * a_in *
+                         (t_in.price / t_out.price)) * t_out.price
+    return price_impact_loss

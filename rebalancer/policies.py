@@ -1,4 +1,4 @@
-from rebalancer.names import ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION_SWAP, ACTION, ARGUMENTS, BLOCK, POOL
+from rebalancer.names import ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION_SWAP, ACTION, ARGUMENTS, BLOCK, POOL, USER_PROFIT, ARBITRAGEUR_PROFIT, NORMAL_PROFIT
 from rebalancer import formulas
 import random
 import numpy as np
@@ -29,7 +29,7 @@ def best_arbitrage(tokens):
     else:
         a_out = formulas.amount_out(a_in, in_token, out_token)
 
-    profit = (a_out - a_in * (in_token.price / out_token.price)) * \
+    profit = (a_out - (1 - formulas.SWAP_FEE) * a_in * (in_token.price / out_token.price)) * \
         out_token.price
 
     return a_in, in_token.name, out_token.name, profit
@@ -81,9 +81,9 @@ def get_user_policy():
                 print("ARBITRAGE OPORTUNITY")
                 if random.random() < 0.6:
                     print("ARBITRAGE")
-                    return {ACTION: ACTION_SWAP, ARGUMENTS: arbitrage}
+                    return {ACTION: ACTION_SWAP, ARGUMENTS: arbitrage, USER_PROFIT: ARBITRAGEUR_PROFIT}
             print("RANDOM swap")
-            return {ACTION: ACTION_SWAP, ARGUMENTS: random_swap_tokens(s[POOL])}
+            return {ACTION: ACTION_SWAP, ARGUMENTS: random_swap_tokens(s[POOL]), USER_PROFIT: NORMAL_PROFIT}
         else:
             return {}
     return user_policy

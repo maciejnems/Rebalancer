@@ -11,8 +11,8 @@ genesis_states = get_genesis_state(
     tokens, [100000.0, 89000.0], [0.4, 0.6], [1.0, 1.0])
 
 # Balanced Genesis State
-# genesis_states = get_genesis_state(
-#     tokens, [731.1041490513539, 1096.6562235770307], [0.4, 0.6], [1.0, 1.0])
+genesis_states = get_genesis_state(
+    tokens, [73100.1041490513539, 109600.6562235770307], [0.4, 0.6], [1.0, 1.0])
 
 user_record = {
     "root": {
@@ -28,6 +28,7 @@ psubs = [
         "variables": {
             state_updates.get_pool_state_upadate(user_record),
             state_updates.block_update,
+            state_updates.profit_update,
         }
     }
 ]
