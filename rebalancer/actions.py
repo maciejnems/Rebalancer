@@ -40,11 +40,11 @@ def remove_liquidity(state, user_register, redeemed: float, name: str, user: str
     if withdrawal > state[name].balance:
         print(f"Not enough tokens to withdraw {withdrawal} of token {name}")
         return state
+    target_ratios = formulas.new_target_ratios(
+        name, -withdrawal, state)
     state[name].supply -= redeemed
     user_register[user][name] -= redeemed
     state[name].balance -= withdrawal
-    target_ratios = formulas.new_target_ratios(
-        name, -withdrawal, state)
     for name, tr in target_ratios.items():
         state[name].target_ratio = tr
     return state
