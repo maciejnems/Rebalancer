@@ -29,7 +29,7 @@ def best_arbitrage(tokens):
     else:
         a_out = formulas.amount_out(a_in, in_token, out_token)
 
-    profit = (a_out - (1 - formulas.SWAP_FEE) * a_in * (in_token.price / out_token.price)) * \
+    profit = (1 - formulas.SWAP_FEE) * (a_out - a_in * (in_token.price / out_token.price)) * \
         out_token.price
 
     return a_in, in_token.name, out_token.name, profit

@@ -61,7 +61,7 @@ def get_withdrawal(name: str, redeemed: float, tokens: dict) -> float:
 
 
 def get_price_impact_loss(a_in: float, t_in: Token, t_out: Token):
-    a_out = amount_out(a_in, t_in, t_out) * (1 - SWAP_FEE)
-    price_impact_loss = (a_out - (1 - SWAP_FEE) * a_in *
+    a_out = amount_out(a_in, t_in, t_out)
+    price_impact_loss = (1 - SWAP_FEE) * (a_out -  a_in *
                          (t_in.price / t_out.price)) * t_out.price
     return price_impact_loss
