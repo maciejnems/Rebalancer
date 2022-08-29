@@ -41,3 +41,34 @@ def profit_update(_g, step, sH, s, input):
         profit[user_type] += formulas.get_price_impact_loss(
             a_in, t_in, t_out)
     return (PROFIT, profit)
+
+
+TX_PER_DAY = 20
+
+
+def get_popularity_update(historical_data):
+    def popularity_update(_g, step, sH, s, input):
+        popularity = copy.deepcopy(s[POPULARITY])
+        t = s[BLOCK] / 200
+        floor = math.floor(t)
+        popularity_sum = sum(
+            [ph.iloc[floor].total_volume for ph in historical_data.values()])
+        for name, ph in historical_data.items():
+            popularity[name] = ph.iloc[floor].total_volume / popularity_sum
+        return (POPULARITY, popularity)
+
+    return popularity_update
+
+
+def get_price_update(historical_data):
+    def price_update(_g, step, sH, s, input):
+        pool = copy.deepcopy(s[POOL])
+        t = s[BLOCK] / TX_PER_DAY
+        floor = math.floor(t)
+        ceil = floor + 1
+        for name, ph in historical_data.items():
+            pool[name].price = np.interp(
+                t, [floor, ceil], ph[floor:ceil+1].price)
+        return (POOL, pool)
+
+    return price_update
