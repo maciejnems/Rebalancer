@@ -1,4 +1,4 @@
-from rebalancer.names import ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION_SWAP, ACTION, ARGUMENTS, BLOCK, POOL, USER_PROFIT, ARBITRAGEUR_PROFIT, NORMAL_PROFIT
+from rebalancer.names import ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION_SWAP, ACTION, ARGUMENTS, BLOCK, POOL, PROFIT, ARBITRAGEUR_PROFIT, NORMAL_PROFIT, POPULARITY
 from rebalancer import formulas
 import random
 import numpy as np
@@ -43,14 +43,26 @@ def get_arbitrage(tokens):
         return None
 
 
-def random_swap_tokens(tokens):
-    tokens = random.sample(list(tokens.values()), 2)
-    a_in = np.random.normal(SWAP_MEAN, SWAP_SPREAD) / tokens[0].price
-    return [a_in, tokens[0].name, tokens[1].name]
+def random_swap_tokens(tokens, popularity=None):
+    swapped = []
+    if popularity is None:
+        swapped = random.sample(list(tokens.keys()), 2)
+    else:
+        (names, prob) = zip(*popularity.items())
+        swapped = np.random.choice(names,  2, p=prob, replace=False)
+    t_in, t_out = tokens[swapped[0]], tokens[swapped[1]]
+    a_in = np.random.normal(SWAP_MEAN, SWAP_SPREAD) / t_in.price
+    return [a_in, t_in.name, t_out.name]
 
 
-def random_provide_liquidity(users, tokens):
-    token = random.choice(list(tokens.values()))
+def random_provide_liquidity(users, tokens, popularity=None):
+    token = None
+    if popularity is None:
+        name =  random.choice(list(tokens.keys()))
+    else:
+        (names, prob) = zip(*popularity.items())
+        name = np.random.choice(names,  p=prob)
+    token = tokens[name]
     a_in = np.random.normal(LIQUIDITY_MEAN, LIQUIDITY_SPREAD) / token.price
     user = f'user-{len(users)}'
     users[user] = {token.name: a_in}
@@ -72,7 +84,7 @@ def get_user_policy():
         print("Step: ", s[BLOCK], s[POOL])
         action = random.choices(ACTIONS, weights=PROB, k=1)[0]
         if action is ACTION_PROVIDE_LIQUIDITY:
-            return {ACTION: ACTION_PROVIDE_LIQUIDITY, ARGUMENTS: random_provide_liquidity(users, s[POOL])}
+            return {ACTION: ACTION_PROVIDE_LIQUIDITY, ARGUMENTS: random_provide_liquidity(users, s[POOL], s[POPULARITY])}
         elif action is ACTION_REMOVE_LIQUIDITY:
             return {ACTION: ACTION_REMOVE_LIQUIDITY, ARGUMENTS: random_remove_liquidity(users, s[POOL])}
         elif action is ACTION_SWAP:
@@ -81,9 +93,9 @@ def get_user_policy():
                 print("ARBITRAGE OPORTUNITY")
                 if random.random() < 0.6:
                     print("ARBITRAGE")
-                    return {ACTION: ACTION_SWAP, ARGUMENTS: arbitrage, USER_PROFIT: ARBITRAGEUR_PROFIT}
+                    return {ACTION: ACTION_SWAP, ARGUMENTS: arbitrage, PROFIT: ARBITRAGEUR_PROFIT}
             print("RANDOM swap")
-            return {ACTION: ACTION_SWAP, ARGUMENTS: random_swap_tokens(s[POOL]), USER_PROFIT: NORMAL_PROFIT}
+            return {ACTION: ACTION_SWAP, ARGUMENTS: random_swap_tokens(s[POOL], s[POPULARITY]), PROFIT: NORMAL_PROFIT}
         else:
             return {}
     return user_policy
