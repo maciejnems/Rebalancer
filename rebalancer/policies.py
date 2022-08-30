@@ -5,7 +5,7 @@ import numpy as np
 
 MIN_PROFIT = 20
 ACTIONS = [ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION_SWAP]
-PROB = [16, 4, 80]
+PROB = [25, 5, 70]
 
 # Distribution of liquidity providing and swaps based on fiat
 LIQUIDITY_MEAN = 10000
@@ -13,7 +13,7 @@ LIQUIDITY_SPREAD = 5000
 SWAP_MEAN = 1000
 SWAP_SPREAD = 500
 MIN_ARBITRAGE_SWAP_PROFIT = 20
-MIN_INTENTIONAL_DEPOSIT = 1000
+MIN_INTENTIONAL_DEPOSIT = 500
 INTENTIONAL_LIQUIDITY_MEAN = 20000
 INTENTIONAL_LIQUIDITY_SPREAD = 5000
 
@@ -66,10 +66,10 @@ def best_provide_liquidity(tokens, trading_volumes):
     best_profit = max(token_profit, key=token_profit.get)
     diff = formulas.deposit_to_change_ratio(
         best_profit, wanted_target_ratio[best_profit], tokens)
+    print("BEST PROVIDE LIQUIDITY: ", diff, best_profit)
     if diff > MIN_INTENTIONAL_DEPOSIT:
         diff = max(diff, np.random.normal(
             INTENTIONAL_LIQUIDITY_MEAN, INTENTIONAL_LIQUIDITY_SPREAD)) / tokens[best_profit].price
-        print("BEST PROVIDE LIQUIDITY: ", diff, best_profit)
         return [diff, best_profit]
     return None
 
@@ -96,6 +96,7 @@ def random_remove_liquidity(users, tokens):
 
 def get_user_policy():
     users = {}
+    user_count = [1]
 
     def user_policy(_g, step, sH, s):
         print("Step: ", s[BLOCK], s[POOL])
@@ -104,7 +105,8 @@ def get_user_policy():
             deposit = best_provide_liquidity(s[POOL], s[TRADING_VOLUME])
             if deposit is None:
                 deposit = random_provide_liquidity(s[POOL], s[POPULARITY])
-            user = f'user-{len(users)}'
+            user_count[0] += 1
+            user = f'user-{user_count[0]}'
             deposit.append(user)
             users[user] = {deposit[1]: deposit[0]}
             return {ACTION: ACTION_PROVIDE_LIQUIDITY, ARGUMENTS: deposit}

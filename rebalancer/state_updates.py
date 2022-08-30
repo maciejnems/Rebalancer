@@ -44,7 +44,7 @@ def profit_update(_g, step, sH, s, input):
     return (PROFIT, profit)
 
 
-TX_PER_DAY = 40
+TX_PER_DAY = 100
 
 
 def get_popularity_update(historical_data):
@@ -73,6 +73,7 @@ def get_price_update(historical_data):
         return (POOL, pool)
 
     return price_update
+
 
 def trading_volume_update(_g, step, sH, s, input):
     if s[BLOCK] % 200 == 0:
