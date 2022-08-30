@@ -44,6 +44,23 @@ def new_target_ratios(name: str, diff: float, tokens: dict) -> dict:
     return ratios
 
 
+def deposit_to_change_ratio(name: str, wanted_ratio: float, tokens: dict):
+    TB = target_balance(name, tokens)
+    diff = (wanted_ratio /
+            (tokens[name].target_ratio) - 1) * TB / (1-wanted_ratio)
+    return diff
+
+
+def wanted_target_ratio(tokens: dict, trading_volumes: dict):
+    target_ratios = {}
+    numerators = {i: math.sqrt(sum([math.pow(tokens[i].price, 2) * trading_volumes[i][j] + math.pow(
+        tokens[j].price, 2) * trading_volumes[j][i] for j in tokens.keys() if j != i])) for i in tokens.keys()}
+    denominator = sum(numerators.values())
+    target_ratios = {name: numerator /
+                     denominator for name, numerator in numerators.items()}
+    return target_ratios
+
+
 #             Deposit_i * Supply_i
 # P_issued = ----------------------
 #                      TB_i
@@ -62,6 +79,6 @@ def get_withdrawal(name: str, redeemed: float, tokens: dict) -> float:
 
 def get_price_impact_loss(a_in: float, t_in: Token, t_out: Token):
     a_out = amount_out(a_in, t_in, t_out)
-    price_impact_loss = (1 - SWAP_FEE) * (a_out -  a_in *
-                         (t_in.price / t_out.price)) * t_out.price
+    price_impact_loss = (1 - SWAP_FEE) * (a_out - a_in *
+                                          (t_in.price / t_out.price)) * t_out.price
     return price_impact_loss

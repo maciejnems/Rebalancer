@@ -1,5 +1,5 @@
 from rebalancer.model import Token
-from rebalancer.names import BLOCK, POOL, PROFIT, ARBITRAGEUR_PROFIT, NORMAL_PROFIT, POPULARITY
+from rebalancer.names import BLOCK, POOL, PROFIT, ARBITRAGEUR_PROFIT, NORMAL_PROFIT, POPULARITY, TRADING_VOLUME
 from rebalancer import formulas
 
 
@@ -36,5 +36,6 @@ def get_state_from_historical_data(historical_data):
         },
         POPULARITY: {
             t: d.iloc[0].total_volume / popularity_sum for t, d in historical_data.items()
-        }
+        },
+        TRADING_VOLUME: {}
     }

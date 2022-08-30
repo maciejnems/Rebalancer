@@ -1,9 +1,9 @@
 import pandas as pd
 
 tokens = [
-    "usdt",
+    # "usdt",
     "usdc",
-    "eth",
+    # "eth",
     # "btc",
     "bnb",
     "dot",

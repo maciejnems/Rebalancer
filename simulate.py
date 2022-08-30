@@ -1,7 +1,7 @@
 from cadCAD.configuration.utils import config_sim
 from cadCAD.configuration import Experiment
 from rebalancer import state_updates, policies,  utils, genesis
-from rebalancer.names import POOL, BLOCK, PROFIT, POPULARITY
+from rebalancer.names import POOL, BLOCK, PROFIT, POPULARITY, TRADING_VOLUME
 
 # tokens = ['USDC', 'USDT']
 
@@ -28,6 +28,7 @@ psubs = [
         "variables": {
             POOL: state_updates.get_price_update(historical_data),
             POPULARITY: state_updates.get_popularity_update(historical_data),
+            TRADING_VOLUME: state_updates.trading_volume_update,
         }
 
     },
@@ -40,7 +41,7 @@ psubs = [
             POOL: state_updates.get_pool_state_upadate(user_record),
             BLOCK: state_updates.block_update,
         }
-    }
+    },
 ]
 
 

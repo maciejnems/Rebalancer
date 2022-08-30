@@ -1,7 +1,8 @@
 from multiprocessing.dummy import Pool
 from rebalancer.actions import swap, provide_liquidity, remove_liquidity
-from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, PROFIT, ARGUMENTS, POOL, BLOCK, POPULARITY
+from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, PROFIT, ARGUMENTS, POOL, BLOCK, POPULARITY, TRADING_VOLUME
 from rebalancer import formulas
+from rebalancer.policies import SWAP_MEAN
 import numpy as np
 import math
 import copy
@@ -43,7 +44,7 @@ def profit_update(_g, step, sH, s, input):
     return (PROFIT, profit)
 
 
-TX_PER_DAY = 20
+TX_PER_DAY = 40
 
 
 def get_popularity_update(historical_data):
@@ -72,3 +73,16 @@ def get_price_update(historical_data):
         return (POOL, pool)
 
     return price_update
+
+def trading_volume_update(_g, step, sH, s, input):
+    if s[BLOCK] % 200 == 0:
+        trading_volume = {name: {} for name in s[POOL].keys()}
+        for t_in, volume in trading_volume.items():
+            for t_out in trading_volume.keys():
+                if t_out != t_in:
+                    volume[t_out] = s[POPULARITY][t_in] * \
+                        s[POPULARITY][t_out] * TX_PER_DAY * SWAP_MEAN
+        print(trading_volume)
+        return (TRADING_VOLUME, trading_volume)
+    else:
+        return (TRADING_VOLUME, s[TRADING_VOLUME])

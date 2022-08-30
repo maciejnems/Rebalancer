@@ -72,3 +72,32 @@ class TestFormulas(TestCase):
 
         self.assertAlmostEqual(formulas.get_withdrawal(
             "a", withdrawal, tokens), 200)
+
+    def test_target_ratio(self):
+        tokens = {"a": Token("a", 650, 0.4, 1.0),
+                  "b": Token("b", 354.74544842973154, 0.2, 1.0),
+                  "c": Token("c", 100.0, 0.4, 100.0)}
+        trading_volumes = {
+            "a": {"b": 100, "c": 200},
+            "b": {"a": 100, "c": 100},
+            "c": {"a": 200, "b": 100},
+        }
+        wanted_target_ratio = formulas.wanted_target_ratio(
+            tokens, trading_volumes)
+
+        self.assertAlmostEqual(wanted_target_ratio["a"], 0.34108438811776465)
+        self.assertAlmostEqual(wanted_target_ratio["b"], 0.2411951402364336)
+        self.assertAlmostEqual(wanted_target_ratio["c"], 0.41772047164580184)
+
+    def test_new_target_ratios(self):
+        tokens = {"a": Token("a", 400, 0.5, 1.0),
+                  "b": Token("b", 400, 0.5, 1.0)}
+
+        diff = formulas.deposit_to_change_ratio("a", 0.6, tokens)
+        self.assertAlmostEqual(diff, 200)
+
+        tokens = {"a": Token("a", 600, 0.6, 1.0),
+                  "b": Token("b", 400, 0.4, 1.0)}
+
+        diff = formulas.deposit_to_change_ratio("a", 0.5, tokens)
+        self.assertAlmostEqual(diff, -200)
