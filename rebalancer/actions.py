@@ -35,7 +35,7 @@ def remove_liquidity(state, user_register, redeemed: float, name: str, user: str
         redeemed = user_register[user][name]
     if user_register[user][name] < redeemed:
         print(
-            f"User does not have enough founds. Tried to withdraw {redeemed}, has {user_register[user][name]}")
+            f"User {user} does not have enough founds. Tried to withdraw {redeemed} {name}, has {user_register[user][name]} {name}")
         return state
     withdrawal = formulas.get_withdrawal(name, redeemed, state)
     if withdrawal > state[name].balance:

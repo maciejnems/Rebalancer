@@ -91,7 +91,7 @@ def random_remove_liquidity(users, tokens):
         return [10, "USDC", "dummy"]
     user = random.choice(list(users.keys()))
     token = [v for v in users.pop(user).items()][0]
-    return [token[0], token[1], user]
+    return [token[1], token[0], user]
 
 
 def get_user_policy():
@@ -108,7 +108,7 @@ def get_user_policy():
             user_count[0] += 1
             user = f'user-{user_count[0]}'
             deposit.append(user)
-            users[user] = {deposit[1]: deposit[0]}
+            users[user] = {deposit[1]: formulas.get_issued(deposit[1], deposit[0], s[POOL])}
             return {ACTION: ACTION_PROVIDE_LIQUIDITY, ARGUMENTS: deposit}
         elif action is ACTION_REMOVE_LIQUIDITY:
             return {ACTION: ACTION_REMOVE_LIQUIDITY, ARGUMENTS: random_remove_liquidity(users, s[POOL])}
