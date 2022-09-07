@@ -2,7 +2,7 @@ from multiprocessing.dummy import Pool
 from rebalancer.actions import swap, provide_liquidity, remove_liquidity, rebalance
 from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, PROFIT, ARGUMENTS, POOL, BLOCK, POPULARITY, TRADING_VOLUME
 from rebalancer import formulas
-from rebalancer.policies import SWAP_MEAN
+from rebalancer.policies import SWAP_MEAN, best_provide_liquidity
 import numpy as np
 import math
 import copy
@@ -17,9 +17,12 @@ rebalancer_actions = {
 def get_pool_state_upadate(user_record: dict, historical_data, should_rebalance):
     def state_update(_g, step, sH, s, input):
         pool = copy.deepcopy(s[POOL])
-        print("Update: ", input[ACTION], input[ARGUMENTS])
-        action = input[ACTION]
-        if action in rebalancer_actions:
+        # Make actions
+        if s[BLOCK] % (TX_PER_DAY * UPDATE_INTERVAL) == 2:
+            if should_rebalance:
+                pool = rebalance(s[POOL], user_record,
+                                 s[TRADING_VOLUME], "root")
+        else:
             action = input[ACTION]
             if action in rebalancer_actions:
                 pool = rebalancer_actions[action](
@@ -56,6 +59,7 @@ def profit_update(_g, step, sH, s, input):
 
 TX_PER_DAY = 200
 UPDATE_INTERVAL = 1
+MAX_HISTORY_CACHE = 1
 
 
 def get_popularity_update(historical_data):
@@ -92,14 +96,11 @@ def trading_volume_update(_g, step, sH, s, input):
     if s[BLOCK] % (TX_PER_DAY * UPDATE_INTERVAL) == 1:
         trading_volume = {
             name: {} for name in s[POOL].keys()}
-    if s[BLOCK] % 200 == 0:
-        trading_volume = {name: {} for name in s[POOL].keys()}
         for t_in, volume in trading_volume.items():
             for t_out in trading_volume.keys():
                 if t_out != t_in:
                     volume[t_out] = s[POPULARITY][t_in] * \
                         s[POPULARITY][t_out] * TX_PER_DAY * SWAP_MEAN
-        print(trading_volume)
         return (TRADING_VOLUME, trading_volume)
     else:
         return (TRADING_VOLUME, s[TRADING_VOLUME])

@@ -5,7 +5,8 @@ import numpy as np
 
 MIN_PROFIT = 20
 ACTIONS = [ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION_SWAP]
-PROB = [25, 5, 70]
+# PROB = [25, 5, 70]
+PROB = [0, 0, 100]
 
 # Distribution of liquidity providing and swaps based on fiat
 LIQUIDITY_MEAN = 10000

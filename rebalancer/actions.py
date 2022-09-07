@@ -49,3 +49,13 @@ def remove_liquidity(state, user_register, redeemed: float, name: str, user: str
     for name, tr in target_ratios.items():
         state[name].target_ratio = tr
     return state
+
+
+def rebalance(state, user_register, trading_volumes, user: str):
+    wanted_target_ratios = formulas.wanted_target_ratio(state, trading_volumes)
+    redeem_ratios = {t.name: (
+        wanted_target_ratios[t.name] / t.target_ratio) - 1 for t in state.values()}
+    for t, ratio in redeem_ratios.items():
+        state = remove_liquidity(
+            state, user_register, -state[t].supply * ratio, t, 'root')
+    return state

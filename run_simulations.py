@@ -2,7 +2,7 @@ import pandas as pd
 from tabulate import tabulate
 from cadCAD.engine import ExecutionMode, ExecutionContext, Executor
 from simulations import dex_exp
-from simulations.simulate import exp
+from simulations.simulate import exp, REBALANCE
 
 exec_mode = ExecutionMode()
 
@@ -16,6 +16,7 @@ sys_model_result = pd.DataFrame(sys_model_raw_result)
 final_results = {row.run:  pd.DataFrame([row.profit]) for i, row in sys_model_result.iterrows()}
 final_results = pd.concat(final_results.values(), axis=0)
 final_results.to_csv("output.csv")
+print("Rebalance: ", REBALANCE)
 print(final_results)
 # print(tabulate(final_results, headers='keys', tablefmt='psql'))
 # print()
