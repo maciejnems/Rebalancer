@@ -1,5 +1,5 @@
 from multiprocessing.dummy import Pool
-from rebalancer.actions import swap, provide_liquidity, remove_liquidity
+from rebalancer.actions import swap, provide_liquidity, remove_liquidity, rebalance
 from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, PROFIT, ARGUMENTS, POOL, BLOCK, POPULARITY, TRADING_VOLUME
 from rebalancer import formulas
 from rebalancer.policies import SWAP_MEAN
@@ -14,14 +14,24 @@ rebalancer_actions = {
 }
 
 
-def get_pool_state_upadate(user_record: dict):
+def get_pool_state_upadate(user_record: dict, historical_data, should_rebalance):
     def state_update(_g, step, sH, s, input):
         pool = copy.deepcopy(s[POOL])
         print("Update: ", input[ACTION], input[ARGUMENTS])
         action = input[ACTION]
         if action in rebalancer_actions:
-            return (POOL, rebalancer_actions[action](
-                pool, user_record, *input[ARGUMENTS]))
+            action = input[ACTION]
+            if action in rebalancer_actions:
+                pool = rebalancer_actions[action](
+                    pool, user_record, *input[ARGUMENTS])
+
+        # Update prices
+        t = s[BLOCK] / TX_PER_DAY
+        floor = math.floor(t)
+        ceil = floor + 1
+        for name, ph in historical_data.items():
+            pool[name].price = np.interp(
+                t, [floor, ceil], ph[floor:ceil+1].price)
         else:
             return (POOL, pool)
 
@@ -44,19 +54,22 @@ def profit_update(_g, step, sH, s, input):
     return (PROFIT, profit)
 
 
-TX_PER_DAY = 100
+TX_PER_DAY = 200
+UPDATE_INTERVAL = 1
 
 
 def get_popularity_update(historical_data):
     def popularity_update(_g, step, sH, s, input):
-        popularity = copy.deepcopy(s[POPULARITY])
-        t = s[BLOCK] / 200
-        floor = math.floor(t)
-        popularity_sum = sum(
-            [ph.iloc[floor].total_volume for ph in historical_data.values()])
-        for name, ph in historical_data.items():
-            popularity[name] = ph.iloc[floor].total_volume / popularity_sum
-        return (POPULARITY, popularity)
+        if s[BLOCK] % TX_PER_DAY == 0:
+            popularity = copy.deepcopy(s[POPULARITY])
+            t = math.floor(s[BLOCK] / TX_PER_DAY)
+            popularity_sum = sum(
+                [ph.iloc[t].total_volume for ph in historical_data.values()])
+            for name, ph in historical_data.items():
+                popularity[name] = ph.iloc[t].total_volume / popularity_sum
+            return (POPULARITY, popularity)
+        else:
+            return (POPULARITY, s[POPULARITY])
 
     return popularity_update
 
@@ -76,6 +89,9 @@ def get_price_update(historical_data):
 
 
 def trading_volume_update(_g, step, sH, s, input):
+    if s[BLOCK] % (TX_PER_DAY * UPDATE_INTERVAL) == 1:
+        trading_volume = {
+            name: {} for name in s[POOL].keys()}
     if s[BLOCK] % 200 == 0:
         trading_volume = {name: {} for name in s[POOL].keys()}
         for t_in, volume in trading_volume.items():

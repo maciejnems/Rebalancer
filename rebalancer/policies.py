@@ -13,9 +13,9 @@ LIQUIDITY_SPREAD = 5000
 SWAP_MEAN = 1000
 SWAP_SPREAD = 500
 MIN_ARBITRAGE_SWAP_PROFIT = 20
-MIN_INTENTIONAL_DEPOSIT = 500
-INTENTIONAL_LIQUIDITY_MEAN = 20000
-INTENTIONAL_LIQUIDITY_SPREAD = 5000
+MIN_INTENTIONAL_DEPOSIT = 10000
+INTENTIONAL_LIQUIDITY_MEAN = 50000
+INTENTIONAL_LIQUIDITY_SPREAD = 10000
 
 
 def best_arbitrage(tokens):
@@ -66,9 +66,8 @@ def best_provide_liquidity(tokens, trading_volumes):
     best_profit = max(token_profit, key=token_profit.get)
     diff = formulas.deposit_to_change_ratio(
         best_profit, wanted_target_ratio[best_profit], tokens)
-    print("BEST PROVIDE LIQUIDITY: ", diff, best_profit)
     if diff > MIN_INTENTIONAL_DEPOSIT:
-        diff = max(diff, np.random.normal(
+        diff = min(diff, np.random.normal(
             INTENTIONAL_LIQUIDITY_MEAN, INTENTIONAL_LIQUIDITY_SPREAD)) / tokens[best_profit].price
         return [diff, best_profit]
     return None
@@ -82,7 +81,8 @@ def random_provide_liquidity(tokens, popularity=None):
         (names, prob) = zip(*popularity.items())
         name = np.random.choice(names,  p=prob)
     token = tokens[name]
-    a_in = np.random.normal(LIQUIDITY_MEAN, LIQUIDITY_SPREAD) / token.price
+    a_in = max(np.random.normal(LIQUIDITY_MEAN,
+               LIQUIDITY_SPREAD), 0) / token.price
     return [a_in, token.name]
 
 
@@ -99,27 +99,26 @@ def get_user_policy():
     user_count = [1]
 
     def user_policy(_g, step, sH, s):
-        print("Step: ", s[BLOCK], s[POOL])
+        # print("Step: ", s[BLOCK], s[POOL])
         action = random.choices(ACTIONS, weights=PROB, k=1)[0]
         if action is ACTION_PROVIDE_LIQUIDITY:
-            deposit = best_provide_liquidity(s[POOL], s[TRADING_VOLUME])
-            if deposit is None:
-                deposit = random_provide_liquidity(s[POOL], s[POPULARITY])
+            deposit = random_provide_liquidity(s[POOL], s[POPULARITY])
             user_count[0] += 1
             user = f'user-{user_count[0]}'
             deposit.append(user)
-            users[user] = {deposit[1]: formulas.get_issued(deposit[1], deposit[0], s[POOL])}
+            users[user] = {deposit[1]: formulas.get_issued(
+                deposit[1], deposit[0], s[POOL])}
             return {ACTION: ACTION_PROVIDE_LIQUIDITY, ARGUMENTS: deposit}
         elif action is ACTION_REMOVE_LIQUIDITY:
             return {ACTION: ACTION_REMOVE_LIQUIDITY, ARGUMENTS: random_remove_liquidity(users, s[POOL])}
         elif action is ACTION_SWAP:
             arbitrage = get_arbitrage(s[POOL])
             if arbitrage is not None:
-                print("ARBITRAGE OPORTUNITY")
+                # print("ARBITRAGE OPORTUNITY")
                 if random.random() < 0.6:
-                    print("ARBITRAGE")
+                    # print("ARBITRAGE")
                     return {ACTION: ACTION_SWAP, ARGUMENTS: arbitrage, PROFIT: ARBITRAGEUR_PROFIT}
-            print("RANDOM swap")
+            # print("RANDOM swap")
             return {ACTION: ACTION_SWAP, ARGUMENTS: random_swap_tokens(s[POOL], s[POPULARITY]), PROFIT: NORMAL_PROFIT}
         else:
             return {}
