@@ -4,7 +4,8 @@ from rebalancer import state_updates, policies,  utils, genesis
 from rebalancer.names import POOL, BLOCK, PROFIT, POPULARITY, TRADING_VOLUME
 
 historical_data = utils.get_historical_data()
-genesis_state = genesis.get_state_from_historical_data(historical_data)
+genesis_state = genesis.get_state_from_historical_data(
+    historical_data)
 
 user_record = {
     "root": {
@@ -31,7 +32,7 @@ psubs = [
 sim_config = config_sim(
     {
         "N": 1,
-        "T": range(400),
+        "T": range(20000),
     }
 )
 
