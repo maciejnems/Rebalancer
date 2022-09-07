@@ -2,11 +2,14 @@ import pandas as pd
 
 tokens = [
     # "usdt",
-    "usdc",
+    # "usdc",
     # "eth",
     # "btc",
+    "ada",
     "bnb",
+    "dai",
     "dot",
+    "matic",
     "sol",
     "xrp",
 ]
