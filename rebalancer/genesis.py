@@ -1,7 +1,7 @@
 from rebalancer.model import Token
 from rebalancer.state_updates import TX_PER_DAY
 from rebalancer.policies import SWAP_MEAN
-from rebalancer.names import BLOCK, POOL, PROFIT, ARBITRAGEUR_PROFIT, NORMAL_PROFIT, POPULARITY, TRADING_VOLUME
+from rebalancer.names import BLOCK, POOL, PROFIT, ARBITRAGEUR_PROFIT, NORMAL_PROFIT, POPULARITY, TRADING_VOLUME, MAX_HISTORY
 from rebalancer import formulas
 
 
@@ -43,13 +43,22 @@ def get_state_from_historical_data(historical_data):
                 volume[t_out] = popularity[t_in] * \
                     popularity[t_out] * TX_PER_DAY * SWAP_MEAN
 
-    return {
+    user_record = {
+        "root": {
+            name: t.supply for name, t in tokens.items()
+        }
+    }
+
+    genesis_state = {
         BLOCK: 0,
         POOL: tokens,
         PROFIT: {
-            ARBITRAGEUR_PROFIT: 0,
-            NORMAL_PROFIT: 0,
+            ARBITRAGEUR_PROFIT: [0,0,0],
+            NORMAL_PROFIT: [0,0,0],
         },
+        MAX_HISTORY: 100,
         POPULARITY: popularity,
         TRADING_VOLUME: trading_volume
     }
+
+    return user_record, genesis_state

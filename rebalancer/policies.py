@@ -11,9 +11,9 @@ PROB = [0, 0, 100]
 # Distribution of liquidity providing and swaps based on fiat
 LIQUIDITY_MEAN = 10000
 LIQUIDITY_SPREAD = 5000
-SWAP_MEAN = 1000
-SWAP_SPREAD = 500
-MIN_ARBITRAGE_SWAP_PROFIT = 20
+SWAP_MEAN = 5000
+SWAP_SPREAD = 100
+MIN_ARBITRAGE_SWAP_PROFIT = 10
 MIN_INTENTIONAL_DEPOSIT = 10000
 INTENTIONAL_LIQUIDITY_MEAN = 50000
 INTENTIONAL_LIQUIDITY_SPREAD = 10000
@@ -116,7 +116,7 @@ def get_user_policy():
             arbitrage = get_arbitrage(s[POOL])
             if arbitrage is not None:
                 # print("ARBITRAGE OPORTUNITY")
-                if random.random() < 0.6:
+                if random.random() < 0.8:
                     # print("ARBITRAGE")
                     return {ACTION: ACTION_SWAP, ARGUMENTS: arbitrage, PROFIT: ARBITRAGEUR_PROFIT}
             # print("RANDOM swap")
