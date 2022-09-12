@@ -1,9 +1,9 @@
-from rebalancer.names import ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION_SWAP, ACTION, ARGUMENTS, BLOCK, POOL, PROFIT, ARBITRAGEUR_PROFIT, NORMAL_PROFIT, POPULARITY, TRADING_VOLUME
+from rebalancer.names import ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION_SWAP, ACTION, ARGUMENTS,  POOL, PROFIT, ARBITRAGEUR_PROFIT, NORMAL_PROFIT, POPULARITY, TRADING_VOLUME
 from rebalancer import formulas
 import random
 import numpy as np
 
-MIN_PROFIT = 20
+MIN_PROFIT = 40
 ACTIONS = [ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION_SWAP]
 # PROB = [25, 5, 70]
 PROB = [0, 0, 100]
@@ -11,7 +11,7 @@ PROB = [0, 0, 100]
 # Distribution of liquidity providing and swaps based on fiat
 LIQUIDITY_MEAN = 10000
 LIQUIDITY_SPREAD = 5000
-SWAP_MEAN = 5000
+SWAP_MEAN = 3000
 SWAP_SPREAD = 100
 MIN_ARBITRAGE_SWAP_PROFIT = 10
 MIN_INTENTIONAL_DEPOSIT = 10000
@@ -34,7 +34,9 @@ def best_arbitrage(tokens):
     else:
         a_out = formulas.amount_out(a_in, in_token, out_token)
 
-    profit = (1 - formulas.SWAP_FEE) * (a_out - a_in * (in_token.price / out_token.price)) * \
+    # profit = (1 - formulas.SWAP_FEE) * (a_out - a_in * (in_token.price / out_token.price)) * \
+    #     out_token.price
+    profit = (a_out - a_in * (in_token.price / out_token.price)) * \
         out_token.price
 
     return a_in, in_token.name, out_token.name, profit
@@ -42,6 +44,7 @@ def best_arbitrage(tokens):
 
 def get_arbitrage(tokens):
     a_in, in_token, out_token, profit = best_arbitrage(tokens)
+    # print("best arbitrage ", profit)
     if profit > MIN_ARBITRAGE_SWAP_PROFIT:
         return [a_in, in_token, out_token]
     else:
@@ -116,7 +119,7 @@ def get_user_policy():
             arbitrage = get_arbitrage(s[POOL])
             if arbitrage is not None:
                 # print("ARBITRAGE OPORTUNITY")
-                if random.random() < 0.8:
+                if random.random() < 1:
                     # print("ARBITRAGE")
                     return {ACTION: ACTION_SWAP, ARGUMENTS: arbitrage, PROFIT: ARBITRAGEUR_PROFIT}
             # print("RANDOM swap")

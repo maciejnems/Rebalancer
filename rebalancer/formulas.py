@@ -23,6 +23,9 @@ def _target_balance_denominator(tokens: dict) -> float:
 def _compute_C(tokens: dict) -> float:
     return math.prod(math.pow(t.balance, t.target_ratio) for t in tokens.values())
 
+def compute_V(tokens: dict) -> float:
+    return sum([t.balance * t.price for t in tokens.values()])
+
 
 def target_balances(tokens: dict) -> dict:
     C = _compute_C(tokens)
@@ -80,6 +83,8 @@ def get_withdrawal(name: str, redeemed: float, tokens: dict) -> float:
 
 def get_price_impact_loss(a_in: float, t_in: Token, t_out: Token):
     a_out = amount_out(a_in, t_in, t_out)
-    price_impact_loss = (1 - SWAP_FEE) * (a_out - a_in *
-                                          (t_in.price / t_out.price)) * t_out.price
+    # price_impact_loss = (1 - SWAP_FEE) * (a_out - a_in *
+    #                                       (t_in.price / t_out.price)) * t_out.price
+    price_impact_loss = (a_out - a_in *
+                         (t_in.price / t_out.price)) * t_out.price
     return price_impact_loss
