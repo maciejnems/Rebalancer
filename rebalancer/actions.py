@@ -1,10 +1,12 @@
-from rebalancer import formulas
+from rebalancer import formulas, policies
 from rebalancer.model import Token
 
 
 def swap(state, user_register, a_in: float, t_in: str, t_out: str):
+    # a_out = formulas.amount_out(
+    #     a_in, state[t_in], state[t_out]) * (1 - formulas.SWAP_FEE)
     a_out = formulas.amount_out(
-        a_in, state[t_in], state[t_out]) * (1 - formulas.SWAP_FEE)
+        a_in, state[t_in], state[t_out])
     state[t_in].balance += a_in
     state[t_out].balance -= a_out
     return state
