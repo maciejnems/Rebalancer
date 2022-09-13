@@ -7,8 +7,7 @@ def aggregator(a, b):
     return a+b
 
 
-def append(experiment, blocks):
-    historical_data = utils.get_historical_data()
+def append(experiment, blocks, historical_data):
     user_record, genesis_state = genesis.get_state_from_historical_data(
         historical_data)
 

@@ -22,6 +22,7 @@ final_results = {}
 for (id, m, len) in confs:
     counter += len + 1
     final_results[id] = pd.DataFrame([id])
+    final_results[id]["update interval"] = m[names.UPDATE_INTERVAL]
     final_results[id]["history cache"] = m[names.POPULARIT_CACHE]
     final_results[id]["average loss"] = (sys_model_result.iloc[counter].profit[names.NORMAL_PROFIT][1] +
                                          sys_model_result.iloc[counter].profit[names.NORMAL_PROFIT][2]) / sys_model_result.iloc[counter].profit[names.NORMAL_PROFIT][0]

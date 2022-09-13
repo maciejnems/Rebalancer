@@ -3,8 +3,24 @@ import matplotlib.pyplot as plt
 from rebalancer import utils
 import numpy as np
 
+tokens_popular_2021 = [
+    # "usdt",
+    # "btc",
+    # "eth",
+    "ltc",
+    "bch",
+    "xrp",
+    "eos",
+    "dot",
+    "busd",
+    # "doge",
+    "ada",
+    "link",
+    "Uni",
+]
 
-historical_data = utils.get_historical_data()
+historical_data = utils.get_historical_data(
+    tokens_popular_2021, "2020-10-01 00:00:00 UTC", "2022-08-25 00:00:00 UTC")
 
 
 fig = plt.figure()
