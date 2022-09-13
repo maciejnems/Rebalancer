@@ -1,6 +1,6 @@
 from cadCAD.configuration.utils import config_sim
 from rebalancer import state_updates, policies,  utils, genesis
-from rebalancer.names import POOL, BLOCK, PROFIT, POPULARITY, TRADING_VOLUME, MAX_HISTORY
+from rebalancer.names import POOL, BLOCK, PROFIT, POPULARITY, MAX_HISTORY, POPULARIT_CACHE, UPDATE_INTERVAL
 
 
 def aggregator(a, b):
@@ -16,6 +16,7 @@ def append(experiment, blocks):
         {
             "N": 1,
             "T": range(blocks),
+            "M": {POPULARIT_CACHE: [None], UPDATE_INTERVAL: [1]},
         }
     )
 
@@ -29,14 +30,13 @@ def append(experiment, blocks):
                 POOL: state_updates.get_pool_state_upadate(user_record, historical_data, False),
                 BLOCK: state_updates.block_update,
                 POPULARITY: state_updates.get_popularity_update(historical_data),
-                TRADING_VOLUME: state_updates.trading_volume_update,
                 MAX_HISTORY: state_updates.prune_state_history,
             }
         },
     ]
 
     experiment.append_model(
-        model_id='equal_target_ratios',
+        model_id='Balancer',
         sim_configs=sim_config,
         initial_state=genesis_state,
         partial_state_update_blocks=psubs,

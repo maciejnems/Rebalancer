@@ -1,21 +1,22 @@
 from cadCAD.configuration.utils import config_sim
 from rebalancer import state_updates, policies,  utils, genesis
-from rebalancer.names import POOL, BLOCK, PROFIT, POPULARITY, TRADING_VOLUME, MAX_HISTORY
+from rebalancer.names import POOL, BLOCK, POPULARIT_CACHE, PROFIT, POPULARITY, TRADING_VOLUME, MAX_HISTORY, UPDATE_INTERVAL
 
 
 def aggregator(a, b):
     return a+b
 
 
-def append(experiment, blocks):
+def append(experiment, blocks, max_history_cache):
     historical_data = utils.get_historical_data()
     user_record, genesis_state = genesis.get_state_from_historical_data(
-     historical_data)
+        historical_data)
 
     sim_config = config_sim(
         {
             "N": 1,
             "T": range(blocks),
+            "M": {POPULARIT_CACHE: [max_history_cache], UPDATE_INTERVAL: [1]}
         }
     )
 
@@ -36,7 +37,7 @@ def append(experiment, blocks):
     ]
 
     experiment.append_model(
-        model_id='rebalancing_target_ratios',
+        model_id='Rebalancer',
         sim_configs=sim_config,
         initial_state=genesis_state,
         partial_state_update_blocks=psubs,

@@ -1,5 +1,4 @@
-from rebalancer import formulas, policies
-from rebalancer.model import Token
+from rebalancer import formulas
 
 
 def swap(state, user_register, a_in: float, t_in: str, t_out: str):
@@ -59,5 +58,5 @@ def rebalance(state, user_register, trading_volumes, user: str):
         wanted_target_ratios[t.name] / t.target_ratio) - 1 for t in state.values()}
     for t, ratio in redeem_ratios.items():
         state = remove_liquidity(
-            state, user_register, -state[t].supply * ratio, t, 'root')
+            state, user_register, -state[t].supply * ratio, t, user)
     return state

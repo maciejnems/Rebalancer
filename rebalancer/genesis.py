@@ -56,7 +56,7 @@ def get_state_from_historical_data(historical_data):
             ARBITRAGEUR_PROFIT: [0, 0, 0],
             NORMAL_PROFIT: [0, 0, 0],
         },
-        MAX_HISTORY: 6000,
+        MAX_HISTORY: 10,
         POPULARITY: popularity,
         TRADING_VOLUME: trading_volume
     }

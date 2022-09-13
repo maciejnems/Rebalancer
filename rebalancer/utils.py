@@ -18,7 +18,7 @@ tokens_popular_2021 = [
     # "usdt",
     # "btc",
     # "eth",
-    # "ltc",
+    "ltc",
     "bch",
     "xrp",
     "eos",
@@ -38,7 +38,7 @@ def read_csv(token_file):
     # data = data[data.snapped_at >= "2022-01-25 00:00:00 UTC"]
     # data = data[data.snapped_at >= "2022-08-01 00:00:00 UTC"]
     # data = data[data.snapped_at <= "2022-08-01 00:00:00 UTC"]
-    data = data[data.snapped_at <= "2022-08-01 00:00:00 UTC"]
+    data = data[data.snapped_at <= "2022-08-25 00:00:00 UTC"]
     data.reset_index(drop=True, inplace=True)
     return data
 

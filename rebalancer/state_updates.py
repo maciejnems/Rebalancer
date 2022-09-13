@@ -1,6 +1,6 @@
 from multiprocessing.dummy import Pool
 from rebalancer.actions import swap, provide_liquidity, remove_liquidity, rebalance
-from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, PROFIT, ARGUMENTS, POOL, POPULARITY, TRADING_VOLUME, MAX_HISTORY, ARBITRAGEUR_PROFIT, NORMAL_PROFIT, BLOCK
+from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, PROFIT, ARGUMENTS, POOL, POPULARITY, TRADING_VOLUME, MAX_HISTORY, BLOCK, POPULARIT_CACHE, UPDATE_INTERVAL
 from rebalancer import formulas
 from rebalancer.policies import SWAP_MEAN, best_provide_liquidity
 import numpy as np
@@ -21,10 +21,10 @@ def prune_state_history(_g, step, sH, s, input):
 
 
 def get_pool_state_upadate(user_record: dict, historical_data, should_rebalance):
-    def state_update(_g, step, sH, s, input):
+    def state_update(params, step, sH, s, input):
         pool = copy.deepcopy(s[POOL])
         # Make actions
-        if s[BLOCK] % (TX_PER_DAY * UPDATE_INTERVAL) == 2:
+        if s[BLOCK] % (TX_PER_DAY * params[UPDATE_INTERVAL]) == 2:
             if should_rebalance:
                 pool = rebalance(s[POOL], user_record,
                                  s[TRADING_VOLUME], "root")
@@ -69,8 +69,8 @@ def profit_update(_g, step, sH, s, input):
 
 
 TX_PER_DAY = 200
-UPDATE_INTERVAL = 1
-MAX_HISTORY_CACHE = 7
+
+popularity_history = []
 
 
 def get_popularity_update(historical_data):
@@ -89,28 +89,25 @@ def get_popularity_update(historical_data):
     return popularity_update
 
 
-def trading_volume_update(_g, step, sH, s, input):
-    if s[BLOCK] % (TX_PER_DAY * UPDATE_INTERVAL) == 1:
+def trading_volume_update(params, step, sH, s, input):
+    if s[BLOCK] % (TX_PER_DAY * params[UPDATE_INTERVAL]) == 1:
+        popularity_history.append(copy.deepcopy(s[POPULARITY]))
+        if len(popularity_history) > params[POPULARIT_CACHE]:
+            popularity_history.pop(0)
         trading_volume = {
             name: {t: 0 for t in s[POOL].keys() if t != name} for name in s[POOL].keys()}
-        for sh in sH[-TX_PER_DAY * MAX_HISTORY_CACHE::TX_PER_DAY]:
+        for sh in popularity_history:
             for t_in, volume in trading_volume.items():
                 for t_out in trading_volume.keys():
                     if t_out != t_in:
-                        volume[t_out] += sh[0][POPULARITY][t_in] * \
-                            sh[0][POPULARITY][t_out] / \
-                            (1 - sh[0][POPULARITY][t_in]) * \
+                        volume[t_out] += sh[t_in] * \
+                            sh[t_out] / \
+                            (1 - sh[t_in]) * \
                             TX_PER_DAY * SWAP_MEAN
         for t_in, volume in trading_volume.items():
             for t_out in trading_volume.keys():
                 if t_out != t_in:
-                    volume[t_out] /= len(sH[-TX_PER_DAY *
-                                         MAX_HISTORY_CACHE::TX_PER_DAY])
-        # for t_in, volume in trading_volume.items():
-        #     for t_out in trading_volume.keys():
-        #         if t_out != t_in:
-        #             volume[t_out] = s[POPULARITY][t_in] * \
-        #                 s[POPULARITY][t_out] / (1 - s[POPULARITY][t_in]) * TX_PER_DAY * SWAP_MEAN
+                    volume[t_out] /= len(popularity_history)
         return (TRADING_VOLUME, trading_volume)
     else:
         return (TRADING_VOLUME, s[TRADING_VOLUME])
