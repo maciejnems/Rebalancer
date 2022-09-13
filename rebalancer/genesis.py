@@ -1,5 +1,4 @@
-from rebalancer.model import Token
-from rebalancer.state_updates import TX_PER_DAY
+from rebalancer.model import Token, VALUE_PER_TOKEN, TX_PER_DAY
 from rebalancer.policies import SWAP_MEAN
 from rebalancer.names import BLOCK, POOL, PROFIT, ARBITRAGEUR_PROFIT, NORMAL_PROFIT, POPULARITY, TRADING_VOLUME, MAX_HISTORY
 from rebalancer import formulas
@@ -17,14 +16,11 @@ def get_state(tokens, balances, target_ratios, prices):
     }
 
 
-BALANCE = 1_000_000
-
-
 def get_state_from_historical_data(historical_data):
     # value_sum = sum([d.iloc[0].market_cap for d in historical_data.values()])
-    # tokens = {t: Token(t, BALANCE / d.iloc[0].price,
+    # tokens = {t: Token(t, VALUE_PER_TOKEN / d.iloc[0].price,
     #                    d.iloc[0].market_cap / value_sum, d.iloc[0].price) for t, d in historical_data.items()}
-    tokens = {t: Token(t, BALANCE / d.iloc[0].price,
+    tokens = {t: Token(t, VALUE_PER_TOKEN / d.iloc[0].price,
                        1/len(historical_data), d.iloc[0].price) for t, d in historical_data.items()}
     target_balances = formulas.target_balances(tokens)
     for t, tr in target_balances.items():

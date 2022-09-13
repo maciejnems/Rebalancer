@@ -60,3 +60,13 @@ def rebalance(state, user_register, trading_volumes, user: str):
         state = remove_liquidity(
             state, user_register, -state[t].supply * ratio, t, user)
     return state
+
+
+def compensate(state, user_register, user, genesis_V):
+    V = formulas.compute_V(state)
+    TB = formulas.target_balances(state)
+    ratio = (genesis_V - V) / V
+    for t, tb in TB.items():
+        state = remove_liquidity(
+            state, user_register, -state[t].supply * ratio, t, user)
+    return state

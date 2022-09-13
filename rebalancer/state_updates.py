@@ -1,8 +1,8 @@
-from multiprocessing.dummy import Pool
-from rebalancer.actions import swap, provide_liquidity, remove_liquidity, rebalance
+from rebalancer.actions import swap, provide_liquidity, remove_liquidity, rebalance, compensate
 from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, PROFIT, ARGUMENTS, POOL, POPULARITY, TRADING_VOLUME, MAX_HISTORY, BLOCK, POPULARIT_CACHE, UPDATE_INTERVAL
 from rebalancer import formulas
-from rebalancer.policies import SWAP_MEAN, best_provide_liquidity
+from rebalancer.policies import SWAP_MEAN
+from rebalancer.model import VALUE_PER_TOKEN, TX_PER_DAY
 import numpy as np
 import math
 import copy
@@ -28,6 +28,8 @@ def get_pool_state_upadate(user_record: dict, historical_data, should_rebalance)
             if should_rebalance:
                 pool = rebalance(s[POOL], user_record,
                                  s[TRADING_VOLUME], "root")
+            pool = compensate(s[POOL], user_record, "root",
+                              len(historical_data) * VALUE_PER_TOKEN)
         else:
             action = input[ACTION]
             if action in rebalancer_actions:
@@ -67,8 +69,6 @@ def profit_update(_g, step, sH, s, input):
             profit[user_type][2] += diff
     return (PROFIT, profit)
 
-
-TX_PER_DAY = 200
 
 popularity_history = []
 

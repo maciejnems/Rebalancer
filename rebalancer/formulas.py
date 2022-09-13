@@ -23,6 +23,7 @@ def _target_balance_denominator(tokens: dict) -> float:
 def _compute_C(tokens: dict) -> float:
     return math.prod(math.pow(t.balance, t.target_ratio) for t in tokens.values())
 
+
 def compute_V(tokens: dict) -> float:
     return sum([t.balance * t.price for t in tokens.values()])
 
@@ -56,9 +57,11 @@ def deposit_to_change_ratio(name: str, wanted_ratio: float, tokens: dict):
 
 def wanted_target_ratio(tokens: dict, trading_volumes: dict):
     target_ratios = {}
+    numerators = {i: math.sqrt(sum([trading_volumes[i][j] + trading_volumes[j][i]
+                               for j in tokens.keys() if j != i])) for i in tokens.keys()}
     # In this implementation trading_volumes already are V_i,j * P_i, so no need for squaring price like in paper
-    numerators = {i: math.sqrt(sum([tokens[i].price * trading_volumes[i][j] + tokens[j].price *
-                               trading_volumes[j][i] for j in tokens.keys() if j != i])) for i in tokens.keys()}
+    # numerators = {i: math.sqrt(sum([tokens[i].price * trading_volumes[i][j] + tokens[j].price *
+    #                            trading_volumes[j][i] for j in tokens.keys() if j != i])) for i in tokens.keys()}
     denominator = sum(numerators.values())
     target_ratios = {name: numerator /
                      denominator for name, numerator in numerators.items()}

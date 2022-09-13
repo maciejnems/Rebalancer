@@ -1,3 +1,7 @@
+VALUE_PER_TOKEN = 1_000_000
+TX_PER_DAY = 200
+
+
 class Token:
     def __init__(self, name: str, balance: float, tr: float, price: float):
         self.name = name
