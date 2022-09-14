@@ -22,8 +22,20 @@ tokens_popular_2021 = [
     "Uni",
 ]
 
+# Start
+# historical_data = utils.get_historical_data(
+#     tokens_popular_2021, "2020-10-01 00:00:00 UTC", "2022-08-25 00:00:00 UTC")
+
+# During dogecoin
 historical_data = utils.get_historical_data(
-    tokens_popular_2021, "2020-10-01 00:00:00 UTC", "2022-08-25 00:00:00 UTC")
+    tokens_popular_2021, "2020-10-01 00:00:00 UTC", "2021-07-01 00:00:00 UTC")
+
+# After dogecoin
+# historical_data = utils.get_historical_data(
+#     tokens_popular_2021, "2021-07-01 00:00:00 UTC", "2022-08-25 00:00:00 UTC")
+
+# Short
+# historical_data = utils.get_historical_data(tokens_popular_2021, "2022-08-01 00:00:00 UTC", "2022-08-25 00:00:00 UTC")
 
 days = len(next(iter(historical_data.values()))) - 1
 blocks = TX_PER_DAY * days
@@ -37,10 +49,10 @@ print("min tx per day:", min(trading_volumes))
 print("days:", days)
 print("blocks:", blocks)
 simulate_rebalancing_target_ratios.append(
+    dex_exp, blocks, 1, historical_data, trading_volumes)
+simulate_rebalancing_target_ratios.append(
     dex_exp, blocks, 7, historical_data, trading_volumes)
 simulate_rebalancing_target_ratios.append(
     dex_exp, blocks, 14, historical_data, trading_volumes)
-simulate_rebalancing_target_ratios.append(
-    dex_exp, blocks, 21, historical_data, trading_volumes)
 simulate_equal_target_ratios.append(
     dex_exp, blocks, historical_data, trading_volumes)

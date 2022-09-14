@@ -1,5 +1,5 @@
 from rebalancer.actions import swap, provide_liquidity, remove_liquidity, rebalance, compensate
-from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, PROFIT, ARGUMENTS, POOL, POPULARITY, TRADING_VOLUME, MAX_HISTORY, TIMESTAMP, POPULARIT_CACHE, UPDATE_INTERVAL
+from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, PROFIT, ARGUMENTS, POOL, POPULARITY, TRADING_VOLUME, MAX_HISTORY, TIMESTAMP, POPULARITY_CACHE, UPDATE_INTERVAL
 from rebalancer import formulas
 from rebalancer.policies import SWAP_MEAN
 from rebalancer.model import VALUE_PER_TOKEN, Time
@@ -28,13 +28,16 @@ def get_pool_state_upadate(user_record: dict, historical_data, should_rebalance)
             if should_rebalance:
                 pool = rebalance(s[POOL], user_record,
                                  s[TRADING_VOLUME], "root")
-            pool = compensate(s[POOL], user_record, "root",
-                              len(historical_data) * VALUE_PER_TOKEN)
         else:
             action = input[ACTION]
             if action in rebalancer_actions:
                 pool = rebalancer_actions[action](
                     pool, user_record, *input[ARGUMENTS])
+
+        # if s[TIMESTAMP].block == 2:
+        #     print("compensate")
+        #     pool = compensate(s[POOL], user_record, "root",
+        #                       len(historical_data) * VALUE_PER_TOKEN)
 
         # Update prices
         t = s[TIMESTAMP].block / s[TIMESTAMP].block_limit
@@ -98,7 +101,9 @@ def get_trading_volume_update():
     trading_volume_history = []
 
     def trading_volume_update(params, step, sH, s, input):
-        if s[TIMESTAMP].block == 1 and s[TIMESTAMP].day % params[UPDATE_INTERVAL] == 0:
+        if s[TIMESTAMP].block == 1:
+            if len(trading_volume_history) > params[POPULARITY_CACHE]:
+                trading_volume_history.pop(0)
             trading_volume = {
                 name: {} for name in s[POOL].keys()}
             # Trading volume for this day
@@ -110,22 +115,20 @@ def get_trading_volume_update():
                             (1 - s[POPULARITY][t_in]) * \
                             s[TIMESTAMP].block_limit * SWAP_MEAN
             trading_volume_history.append(trading_volume)
-
-            trading_volume = {
-                name: {t: 0 for t in s[POOL].keys() if t != name} for name in s[POOL].keys()}
-            for sh in trading_volume_history[:params[POPULARIT_CACHE]]:
+            if s[TIMESTAMP].day % params[UPDATE_INTERVAL] == 0:
+                trading_volume = {
+                    name: {t: 0 for t in s[POOL].keys() if t != name} for name in s[POOL].keys()}
+                for sh in trading_volume_history[:params[POPULARITY_CACHE]]:
+                    for t_in, volume in trading_volume.items():
+                        for t_out in trading_volume.keys():
+                            if t_out != t_in:
+                                volume[t_out] += sh[t_in][t_out]
                 for t_in, volume in trading_volume.items():
                     for t_out in trading_volume.keys():
                         if t_out != t_in:
-                            volume[t_out] += sh[t_in][t_out]
-            for t_in, volume in trading_volume.items():
-                for t_out in trading_volume.keys():
-                    if t_out != t_in:
-                        volume[t_out] /= len(trading_volume_history)
-            if len(trading_volume_history) > params[POPULARIT_CACHE]:
-                trading_volume_history.pop(0)
-            return (TRADING_VOLUME, trading_volume)
-        else:
-            return (TRADING_VOLUME, s[TRADING_VOLUME])
+                            volume[t_out] /= len(trading_volume_history)
+                return (TRADING_VOLUME, trading_volume)
+
+        return (TRADING_VOLUME, s[TRADING_VOLUME])
 
     return trading_volume_update

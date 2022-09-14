@@ -1,6 +1,6 @@
 from cadCAD.configuration.utils import config_sim
 from rebalancer import state_updates, policies,  utils, genesis
-from rebalancer.names import POOL, TIMESTAMP, POPULARIT_CACHE, PROFIT, POPULARITY, TRADING_VOLUME, MAX_HISTORY, UPDATE_INTERVAL
+from rebalancer.names import POOL, TIMESTAMP, POPULARITY_CACHE, PROFIT, POPULARITY, TRADING_VOLUME, MAX_HISTORY, UPDATE_INTERVAL
 
 
 def aggregator(a, b):
@@ -15,7 +15,7 @@ def append(experiment, blocks, max_history_cache, historical_data, tx_per_day):
         {
             "N": 1,
             "T": range(blocks),
-            "M": {POPULARIT_CACHE: [max_history_cache], UPDATE_INTERVAL: [1]}
+            "M": {POPULARITY_CACHE: [max_history_cache], UPDATE_INTERVAL: [1]}
         }
     )
 
