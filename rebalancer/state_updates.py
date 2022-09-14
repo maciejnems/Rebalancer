@@ -1,8 +1,8 @@
 from rebalancer.actions import swap, provide_liquidity, remove_liquidity, rebalance, compensate
-from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, PROFIT, ARGUMENTS, POOL, POPULARITY, TRADING_VOLUME, MAX_HISTORY, BLOCK, POPULARIT_CACHE, UPDATE_INTERVAL
+from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, PROFIT, ARGUMENTS, POOL, POPULARITY, TRADING_VOLUME, MAX_HISTORY, TIMESTAMP, POPULARIT_CACHE, UPDATE_INTERVAL
 from rebalancer import formulas
 from rebalancer.policies import SWAP_MEAN
-from rebalancer.model import VALUE_PER_TOKEN, TX_PER_DAY
+from rebalancer.model import VALUE_PER_TOKEN, Time
 import numpy as np
 import math
 import copy
@@ -24,7 +24,7 @@ def get_pool_state_upadate(user_record: dict, historical_data, should_rebalance)
     def state_update(params, step, sH, s, input):
         pool = copy.deepcopy(s[POOL])
         # Make actions
-        if s[BLOCK] % (TX_PER_DAY * params[UPDATE_INTERVAL]) == 2:
+        if s[TIMESTAMP].block == 2 and s[TIMESTAMP].block % params[UPDATE_INTERVAL] == 0:
             if should_rebalance:
                 pool = rebalance(s[POOL], user_record,
                                  s[TRADING_VOLUME], "root")
@@ -37,7 +37,7 @@ def get_pool_state_upadate(user_record: dict, historical_data, should_rebalance)
                     pool, user_record, *input[ARGUMENTS])
 
         # Update prices
-        t = s[BLOCK] / TX_PER_DAY
+        t = s[TIMESTAMP].block / s[TIMESTAMP].block_limit
         floor = math.floor(t)
         ceil = floor + 1
         for name, ph in historical_data.items():
@@ -49,8 +49,16 @@ def get_pool_state_upadate(user_record: dict, historical_data, should_rebalance)
     return state_update
 
 
-def block_update(_g, step, sH, s, input):
-    return (BLOCK, s[BLOCK] + 1)
+def get_timestamp_update(tx_per_day):
+    def timestamp_update(_g, step, sH, s, input):
+        if s[TIMESTAMP].block + 1 == s[TIMESTAMP].block_limit:
+            day = s[TIMESTAMP].day + 1
+            return (TIMESTAMP, Time(day, 0, tx_per_day[day]))
+        timestamp = copy.deepcopy(s[TIMESTAMP])
+        timestamp.block += 1
+        return (TIMESTAMP, timestamp)
+
+    return timestamp_update
 
 
 def profit_update(_g, step, sH, s, input):
@@ -70,18 +78,15 @@ def profit_update(_g, step, sH, s, input):
     return (PROFIT, profit)
 
 
-popularity_history = []
-
-
 def get_popularity_update(historical_data):
     def popularity_update(_g, step, sH, s, input):
-        if s[BLOCK] % TX_PER_DAY == 0:
+        if s[TIMESTAMP].block == 0:
             popularity = copy.deepcopy(s[POPULARITY])
-            t = math.floor(s[BLOCK] / TX_PER_DAY)
+            day = s[TIMESTAMP].day
             popularity_sum = sum(
-                [ph.iloc[t].total_volume for ph in historical_data.values()])
+                [ph.iloc[day].total_volume for ph in historical_data.values()])
             for name, ph in historical_data.items():
-                popularity[name] = ph.iloc[t].total_volume / popularity_sum
+                popularity[name] = ph.iloc[day].total_volume / popularity_sum
             return (POPULARITY, popularity)
         else:
             return (POPULARITY, s[POPULARITY])
@@ -89,25 +94,38 @@ def get_popularity_update(historical_data):
     return popularity_update
 
 
-def trading_volume_update(params, step, sH, s, input):
-    if s[BLOCK] % (TX_PER_DAY * params[UPDATE_INTERVAL]) == 1:
-        popularity_history.append(copy.deepcopy(s[POPULARITY]))
-        if len(popularity_history) > params[POPULARIT_CACHE]:
-            popularity_history.pop(0)
-        trading_volume = {
-            name: {t: 0 for t in s[POOL].keys() if t != name} for name in s[POOL].keys()}
-        for sh in popularity_history:
+def get_trading_volume_update():
+    trading_volume_history = []
+
+    def trading_volume_update(params, step, sH, s, input):
+        if s[TIMESTAMP].block == 1 and s[TIMESTAMP].day % params[UPDATE_INTERVAL] == 0:
+            trading_volume = {
+                name: {} for name in s[POOL].keys()}
+            # Trading volume for this day
+            all = 0
             for t_in, volume in trading_volume.items():
                 for t_out in trading_volume.keys():
                     if t_out != t_in:
-                        volume[t_out] += sh[t_in] * \
-                            sh[t_out] / \
-                            (1 - sh[t_in]) * \
-                            TX_PER_DAY * SWAP_MEAN
-        for t_in, volume in trading_volume.items():
-            for t_out in trading_volume.keys():
-                if t_out != t_in:
-                    volume[t_out] /= len(popularity_history)
-        return (TRADING_VOLUME, trading_volume)
-    else:
-        return (TRADING_VOLUME, s[TRADING_VOLUME])
+                        volume[t_out] = s[POPULARITY][t_in] * s[POPULARITY][t_out] / \
+                            (1 - s[POPULARITY][t_in]) * \
+                            s[TIMESTAMP].block_limit * SWAP_MEAN
+            trading_volume_history.append(trading_volume)
+
+            trading_volume = {
+                name: {t: 0 for t in s[POOL].keys() if t != name} for name in s[POOL].keys()}
+            for sh in trading_volume_history[:params[POPULARIT_CACHE]]:
+                for t_in, volume in trading_volume.items():
+                    for t_out in trading_volume.keys():
+                        if t_out != t_in:
+                            volume[t_out] += sh[t_in][t_out]
+            for t_in, volume in trading_volume.items():
+                for t_out in trading_volume.keys():
+                    if t_out != t_in:
+                        volume[t_out] /= len(trading_volume_history)
+            if len(trading_volume_history) > params[POPULARIT_CACHE]:
+                trading_volume_history.pop(0)
+            return (TRADING_VOLUME, trading_volume)
+        else:
+            return (TRADING_VOLUME, s[TRADING_VOLUME])
+
+    return trading_volume_update

@@ -22,15 +22,25 @@ tokens_popular_2021 = [
     "Uni",
 ]
 
-# historical_data = utils.get_historical_data(
-#     tokens_popular_2021, "2020-10-01 00:00:00 UTC", "2022-08-25 00:00:00 UTC")
-historical_data = utils.get_historical_data(tokens_popular_2021, "2021-07-01 00:00:00 UTC", "2022-08-25 00:00:00 UTC")
+historical_data = utils.get_historical_data(
+    tokens_popular_2021, "2020-10-01 00:00:00 UTC", "2022-08-25 00:00:00 UTC")
 
 days = len(next(iter(historical_data.values()))) - 1
 blocks = TX_PER_DAY * days
 
-print("Simulating, days:", days, "blocks:", blocks)
-simulate_rebalancing_target_ratios.append(dex_exp, blocks, 7, historical_data)
-simulate_rebalancing_target_ratios.append(dex_exp, blocks, 14, historical_data)
-simulate_rebalancing_target_ratios.append(dex_exp, blocks, 21, historical_data)
-simulate_equal_target_ratios.append(dex_exp, blocks, historical_data)
+blocks, trading_volumes = utils.get_tx_per_day(historical_data, blocks)
+
+print("Simulating...")
+print("average tx per day:", TX_PER_DAY)
+print("max tx per day:", max(trading_volumes))
+print("min tx per day:", min(trading_volumes))
+print("days:", days)
+print("blocks:", blocks)
+simulate_rebalancing_target_ratios.append(
+    dex_exp, blocks, 7, historical_data, trading_volumes)
+simulate_rebalancing_target_ratios.append(
+    dex_exp, blocks, 14, historical_data, trading_volumes)
+simulate_rebalancing_target_ratios.append(
+    dex_exp, blocks, 21, historical_data, trading_volumes)
+simulate_equal_target_ratios.append(
+    dex_exp, blocks, historical_data, trading_volumes)

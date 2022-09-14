@@ -26,3 +26,11 @@ def read_csv(token_file, start, end):
 def get_historical_data(token_names, start, end):
     token_files = [f"data/{t}-usd-max.csv" for t in token_names]
     return {t: read_csv(f, start, end) for t, f in zip(token_names, token_files)}
+
+def get_tx_per_day(historical_data, blocks):
+    trading_volumes = pd.DataFrame.sum(pd.DataFrame(
+        [hd["total_volume"] for hd in historical_data.values()]))
+    whole_volume = pd.DataFrame.sum(trading_volumes.iloc[:-1])
+    divisior = whole_volume / blocks
+    trading_volumes = (trading_volumes / divisior).round()
+    return int(sum(trading_volumes.iloc[:-1])), trading_volumes

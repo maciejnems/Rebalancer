@@ -22,11 +22,11 @@ final_results = {}
 for (id, m, len) in confs:
     counter += len + 1
     final_results[id] = pd.DataFrame([id])
-    final_results[id]["update interval"] = m[names.UPDATE_INTERVAL]
-    final_results[id]["history cache"] = m[names.POPULARIT_CACHE]
-    final_results[id]["average loss"] = (sys_model_result.iloc[counter].profit[names.NORMAL_PROFIT][1] +
+    final_results[id]["interval"] = m[names.UPDATE_INTERVAL]
+    final_results[id]["cache"] = m[names.POPULARIT_CACHE]
+    final_results[id]["avg loss"] = (sys_model_result.iloc[counter].profit[names.NORMAL_PROFIT][1] +
                                          sys_model_result.iloc[counter].profit[names.NORMAL_PROFIT][2]) / sys_model_result.iloc[counter].profit[names.NORMAL_PROFIT][0]
-    final_results[id]["n"] = sys_model_result.iloc[counter].block
+    final_results[id]["days"] = sys_model_result.iloc[counter].timestamp.day
     final_results[id]["v"] = formulas.compute_V(
         sys_model_result.iloc[counter][names.POOL])
     for t in sys_model_result.iloc[counter][names.POOL].values():
