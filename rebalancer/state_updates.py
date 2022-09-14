@@ -24,7 +24,7 @@ def get_pool_state_upadate(user_record: dict, historical_data, should_rebalance)
     def state_update(params, step, sH, s, input):
         pool = copy.deepcopy(s[POOL])
         # Make actions
-        if s[TIMESTAMP].block == 2 and s[TIMESTAMP].block % params[UPDATE_INTERVAL] == 0:
+        if s[TIMESTAMP].block == 2 and s[TIMESTAMP].day % params[UPDATE_INTERVAL] == 0:
             if should_rebalance:
                 pool = rebalance(s[POOL], user_record,
                                  s[TRADING_VOLUME], "root")
