@@ -1,5 +1,5 @@
 from rebalancer.actions import swap, provide_liquidity, remove_liquidity, rebalance, compensate
-from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, PROFIT, ARGUMENTS, POOL, POPULARITY, TRADING_VOLUME, MAX_HISTORY, TIMESTAMP, POPULARITY_CACHE, UPDATE_INTERVAL
+from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, HEDGING, PROFIT, ARGUMENTS, POOL, POPULARITY, TRADING_VOLUME, MAX_HISTORY, TIMESTAMP, POPULARITY_CACHE, UPDATE_INTERVAL
 from rebalancer import formulas
 from rebalancer.policies import SWAP_MEAN
 from rebalancer.model import VALUE_PER_TOKEN, Time
@@ -15,32 +15,32 @@ rebalancer_actions = {
 
 
 def prune_state_history(_g, step, sH, s, input):
-    if len(sH) > s[MAX_HISTORY]:
-        sH.pop(0)
+    if sH[-1][0][TIMESTAMP].block != 0:
+        sH.pop()
     return (MAX_HISTORY, s[MAX_HISTORY])
 
 
 def get_pool_state_upadate(user_record: dict, historical_data, should_rebalance):
     def state_update(params, step, sH, s, input):
         pool = copy.deepcopy(s[POOL])
-        # Make actions
-        if s[TIMESTAMP].block == 2 and s[TIMESTAMP].day % params[UPDATE_INTERVAL] == 0:
-            if should_rebalance:
-                pool = rebalance(s[POOL], user_record,
-                                 s[TRADING_VOLUME], "root")
-        else:
-            action = input[ACTION]
-            if action in rebalancer_actions:
-                pool = rebalancer_actions[action](
-                    pool, user_record, *input[ARGUMENTS])
+        # Action:
+        action = input[ACTION]
+        if action in rebalancer_actions:
+            pool = rebalancer_actions[action](
+                pool, user_record, *input[ARGUMENTS])
 
-        # if s[TIMESTAMP].block == 2:
-        #     print("compensate")
-        #     pool = compensate(s[POOL], user_record, "root",
-        #                       len(historical_data) * VALUE_PER_TOKEN)
+        if s[TIMESTAMP].block == 2:
+            # Rebalance
+            if should_rebalance and (s[TIMESTAMP].day % params[UPDATE_INTERVAL] == 0):
+                pool = rebalance(pool, user_record,
+                                 s[TRADING_VOLUME], "root")
+            # Compensate
+            if params[HEDGING]:
+                pool = compensate(pool, user_record, "root",
+                                  len(historical_data) * VALUE_PER_TOKEN)
 
         # Update prices
-        t = s[TIMESTAMP].block / s[TIMESTAMP].block_limit
+        t = s[TIMESTAMP].day + s[TIMESTAMP].block / s[TIMESTAMP].block_limit
         floor = math.floor(t)
         ceil = floor + 1
         for name, ph in historical_data.items():
@@ -126,7 +126,8 @@ def get_trading_volume_update():
                 for t_in, volume in trading_volume.items():
                     for t_out in trading_volume.keys():
                         if t_out != t_in:
-                            volume[t_out] /= len(trading_volume_history)
+                            volume[t_out] /= len(
+                                trading_volume_history[:params[POPULARITY_CACHE]])
                 return (TRADING_VOLUME, trading_volume)
 
         return (TRADING_VOLUME, s[TRADING_VOLUME])

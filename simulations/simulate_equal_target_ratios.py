@@ -1,13 +1,13 @@
 from cadCAD.configuration.utils import config_sim
 from rebalancer import state_updates, policies,  utils, genesis
-from rebalancer.names import POOL, TIMESTAMP, PROFIT, POPULARITY, MAX_HISTORY, POPULARITY_CACHE, UPDATE_INTERVAL
+from rebalancer.names import POOL, TIMESTAMP, PROFIT, POPULARITY, MAX_HISTORY
 
 
 def aggregator(a, b):
     return a+b
 
 
-def append(experiment, blocks, historical_data, tx_per_day):
+def append(experiment, blocks, params, historical_data, tx_per_day):
     user_record, genesis_state = genesis.get_state_from_historical_data(
         historical_data, tx_per_day)
 
@@ -15,7 +15,7 @@ def append(experiment, blocks, historical_data, tx_per_day):
         {
             "N": 1,
             "T": range(blocks),
-            "M": {POPULARITY_CACHE: [None], UPDATE_INTERVAL: [1]},
+            "M": params,
         }
     )
 
