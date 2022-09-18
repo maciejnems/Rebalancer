@@ -46,8 +46,7 @@ def get_pool_state_upadate(user_record: dict, historical_data, should_rebalance)
         for name, ph in historical_data.items():
             pool[name].price = np.interp(
                 t, [floor, ceil], ph[floor:ceil+1].price)
-        else:
-            return (POOL, pool)
+        return (POOL, pool)
 
     return state_update
 

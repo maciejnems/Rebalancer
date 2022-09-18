@@ -5,7 +5,6 @@ from simulations import dex_exp, days, historical_data
 from rebalancer import formulas, names
 from matplotlib.ticker import FuncFormatter
 import matplotlib.pyplot as plt
-import numpy as np
 
 
 def human_format(num, pos):
