@@ -1,4 +1,4 @@
-from rebalancer.names import ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION_SWAP, ACTION, ARGUMENTS,  POOL, PROFIT, ARBITRAGEUR_PROFIT, NORMAL_PROFIT, POPULARITY, TRADING_VOLUME
+from rebalancer.names import ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION_SWAP, ACTION, ARGUMENTS,  POOL, PROFIT, ARBITRAGEUR_PROFIT, NORMAL_PROFIT, POPULARITY, SWAP, TRADING_VOLUME
 from rebalancer import formulas
 import random
 import numpy as np
@@ -49,7 +49,7 @@ def get_arbitrage(tokens):
         return None
 
 
-def random_swap_tokens(tokens, popularity=None):
+def random_swap_tokens(swap_mean, tokens, popularity=None):
     swapped = []
     if popularity is None:
         swapped = random.sample(list(tokens.keys()), 2)
@@ -57,7 +57,7 @@ def random_swap_tokens(tokens, popularity=None):
         (names, prob) = zip(*popularity.items())
         swapped = np.random.choice(names,  2, p=prob, replace=False)
     t_in, t_out = tokens[swapped[0]], tokens[swapped[1]]
-    a_in = np.random.normal(SWAP_MEAN, SWAP_SPREAD) / t_in.price
+    a_in = np.random.normal(swap_mean, SWAP_SPREAD) / t_in.price
     return [a_in, t_in.name, t_out.name]
 
 
@@ -100,7 +100,7 @@ def get_user_policy():
     users = {}
     user_count = [1]
 
-    def user_policy(_g, step, sH, s):
+    def user_policy(params, step, sH, s):
         # print("Step: ", s[BLOCK], s[POOL])
         action = random.choices(ACTIONS, weights=PROB, k=1)[0]
         if action is ACTION_PROVIDE_LIQUIDITY:
@@ -121,7 +121,7 @@ def get_user_policy():
                     # print("ARBITRAGE")
                     return {ACTION: ACTION_SWAP, ARGUMENTS: arbitrage, PROFIT: ARBITRAGEUR_PROFIT}
             # print("RANDOM swap")
-            return {ACTION: ACTION_SWAP, ARGUMENTS: random_swap_tokens(s[POOL], s[POPULARITY]), PROFIT: NORMAL_PROFIT}
+            return {ACTION: ACTION_SWAP, ARGUMENTS: random_swap_tokens(params[SWAP], s[POOL], s[POPULARITY]), PROFIT: NORMAL_PROFIT}
         else:
             return {}
     return user_policy

@@ -20,13 +20,6 @@ def get_state_from_historical_data(historical_data, tx_per_day):
     popularity = {t: d.iloc[0].total_volume /
                   popularity_sum for t, d in historical_data.items()}
 
-    trading_volume = {name: {} for name in tokens.keys()}
-    for t_in, volume in trading_volume.items():
-        for t_out in trading_volume.keys():
-            if t_out != t_in:
-                volume[t_out] = popularity[t_in] * \
-                    popularity[t_out] * TX_PER_DAY * SWAP_MEAN
-
     user_record = {
         "root": {
             name: t.supply for name, t in tokens.items()
@@ -42,7 +35,7 @@ def get_state_from_historical_data(historical_data, tx_per_day):
         },
         MAX_HISTORY: 10,
         POPULARITY: popularity,
-        TRADING_VOLUME: trading_volume
+        TRADING_VOLUME: {name: {} for name in tokens.keys()}
     }
 
     return user_record, genesis_state

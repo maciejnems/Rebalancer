@@ -1,4 +1,4 @@
-from rebalancer.names import HEDGING, POPULARITY_CACHE, UPDATE_INTERVAL
+from rebalancer.names import HEDGING, POPULARITY_CACHE, SWAP, UPDATE_INTERVAL
 from cadCAD.configuration import Experiment
 from simulations import simulate_equal_target_ratios, simulate_rebalancing_target_ratios
 from rebalancer.model import TX_PER_DAY
@@ -52,37 +52,15 @@ print("min tx per day:", min(trading_volumes))
 print("days:", days)
 print("blocks:", blocks)
 
-# simulate_rebalancing_target_ratios.append(
-#     dex_exp, blocks, {UPDATE_INTERVAL: [1], POPULARITY_CACHE: [1], HEDGING: [True]}, historical_data, trading_volumes)
-simulate_rebalancing_target_ratios.append(
-    dex_exp, blocks, {UPDATE_INTERVAL: [1], POPULARITY_CACHE: [7], HEDGING: [True]}, historical_data, trading_volumes)
-# simulate_rebalancing_target_ratios.append(
-#     dex_exp, blocks, {UPDATE_INTERVAL: [1], POPULARITY_CACHE: [14], HEDGING: [True]}, historical_data, trading_volumes)
-# simulate_rebalancing_target_ratios.append(
-#     dex_exp, blocks, {UPDATE_INTERVAL: [1], POPULARITY_CACHE: [30], HEDGING: [True]}, historical_data, trading_volumes)
-# simulate_rebalancing_target_ratios.append(
-#     dex_exp, blocks, {UPDATE_INTERVAL: [7], POPULARITY_CACHE: [7], HEDGING: [True]}, historical_data, trading_volumes)
-# simulate_rebalancing_target_ratios.append(
-#     dex_exp, blocks, {UPDATE_INTERVAL: [14], POPULARITY_CACHE: [14], HEDGING: [True]}, historical_data, trading_volumes)
-# simulate_rebalancing_target_ratios.append(
-#     dex_exp, blocks, {UPDATE_INTERVAL: [30], POPULARITY_CACHE: [30], HEDGING: [True]}, historical_data, trading_volumes)
-simulate_equal_target_ratios.append(
-    dex_exp, blocks, {UPDATE_INTERVAL: [None], POPULARITY_CACHE: [None], HEDGING: [True]}, historical_data, trading_volumes)
+for i in range(1, 21):
+    simulate_rebalancing_target_ratios.append(
+        dex_exp, blocks, {UPDATE_INTERVAL: [1], POPULARITY_CACHE: [7], HEDGING: [True], SWAP: [i*1000]}, historical_data, trading_volumes)
+    simulate_equal_target_ratios.append(
+        dex_exp, blocks, {UPDATE_INTERVAL: [None], POPULARITY_CACHE: [None], HEDGING: [True], SWAP: [i*1000]}, historical_data, trading_volumes)
 
-
-# simulate_rebalancing_target_ratios.append(
-#     dex_exp, blocks, {UPDATE_INTERVAL: [1], POPULARITY_CACHE: [1], HEDGING: [False]}, historical_data, trading_volumes)
-# simulate_rebalancing_target_ratios.append(
-#     dex_exp, blocks, {UPDATE_INTERVAL: [1], POPULARITY_CACHE: [7], HEDGING: [False]}, historical_data, trading_volumes)
-# simulate_rebalancing_target_ratios.append(
-#     dex_exp, blocks, {UPDATE_INTERVAL: [1], POPULARITY_CACHE: [14], HEDGING: [False]}, historical_data, trading_volumes)
-# simulate_rebalancing_target_ratios.append(
-#     dex_exp, blocks, {UPDATE_INTERVAL: [1], POPULARITY_CACHE: [30], HEDGING: [False]}, historical_data, trading_volumes)
-# simulate_rebalancing_target_ratios.append(
-#     dex_exp, blocks, {UPDATE_INTERVAL: [7], POPULARITY_CACHE: [7], HEDGING: [False]}, historical_data, trading_volumes)
-# simulate_rebalancing_target_ratios.append(
-#     dex_exp, blocks, {UPDATE_INTERVAL: [14], POPULARITY_CACHE: [14], HEDGING: [False]}, historical_data, trading_volumes)
-# simulate_rebalancing_target_ratios.append(
-#     dex_exp, blocks, {UPDATE_INTERVAL: [30], POPULARITY_CACHE: [30], HEDGING: [False]}, historical_data, trading_volumes)
-# simulate_equal_target_ratios.append(
-#     dex_exp, blocks, {UPDATE_INTERVAL: [None], POPULARITY_CACHE: [None], HEDGING: [False]}, historical_data, trading_volumes)
+for i in range(1, 22):
+    simulate_rebalancing_target_ratios.append(
+        dex_exp, blocks, {UPDATE_INTERVAL: [1], POPULARITY_CACHE: [i], HEDGING: [True], SWAP: [7000]}, historical_data, trading_volumes)
+for i in range(1, 61):
+    simulate_rebalancing_target_ratios.append(
+        dex_exp, blocks, {UPDATE_INTERVAL: [i], POPULARITY_CACHE: [7], HEDGING: [True], SWAP: [7000]}, historical_data, trading_volumes)

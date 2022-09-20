@@ -1,5 +1,5 @@
 from rebalancer.actions import swap, provide_liquidity, remove_liquidity, rebalance, compensate
-from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, HEDGING, PROFIT, ARGUMENTS, POOL, POPULARITY, TRADING_VOLUME, MAX_HISTORY, TIMESTAMP, POPULARITY_CACHE, UPDATE_INTERVAL
+from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, HEDGING, PROFIT, ARGUMENTS, POOL, POPULARITY, SWAP, TRADING_VOLUME, MAX_HISTORY, TIMESTAMP, POPULARITY_CACHE, UPDATE_INTERVAL
 from rebalancer import formulas
 from rebalancer.policies import SWAP_MEAN
 from rebalancer.model import VALUE_PER_TOKEN, Time
@@ -112,7 +112,7 @@ def get_trading_volume_update():
                     if t_out != t_in:
                         volume[t_out] = s[POPULARITY][t_in] * s[POPULARITY][t_out] / \
                             (1 - s[POPULARITY][t_in]) * \
-                            s[TIMESTAMP].block_limit * SWAP_MEAN
+                            s[TIMESTAMP].block_limit * params[SWAP]
             trading_volume_history.append(trading_volume)
             if s[TIMESTAMP].day % params[UPDATE_INTERVAL] == 0:
                 trading_volume = {
