@@ -1,4 +1,4 @@
-from rebalancer.names import ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION_SWAP, ACTION, ARGUMENTS,  POOL, PROFIT, ARBITRAGEUR_PROFIT, NORMAL_PROFIT, POPULARITY, SWAP, TRADING_VOLUME
+from rebalancer.names import ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION_SWAP, ACTION, ARGUMENTS, POOL, USERS, ARBITRAGEUR, NORMAL, POPULARITY, SWAP
 from rebalancer import formulas
 import random
 import numpy as np
@@ -84,7 +84,7 @@ def random_provide_liquidity(tokens, popularity=None):
         name = np.random.choice(names,  p=prob)
     token = tokens[name]
     a_in = max(np.random.normal(LIQUIDITY_MEAN,
-               LIQUIDITY_SPREAD), 0) / token.price
+                                LIQUIDITY_SPREAD), 0) / token.price
     return [a_in, token.name]
 
 
@@ -119,9 +119,9 @@ def get_user_policy():
                 # print("ARBITRAGE OPORTUNITY")
                 if random.random() < 0.8:
                     # print("ARBITRAGE")
-                    return {ACTION: ACTION_SWAP, ARGUMENTS: arbitrage, PROFIT: ARBITRAGEUR_PROFIT}
+                    return {ACTION: ACTION_SWAP, ARGUMENTS: arbitrage, USERS: ARBITRAGEUR}
             # print("RANDOM swap")
-            return {ACTION: ACTION_SWAP, ARGUMENTS: random_swap_tokens(params[SWAP], s[POOL], s[POPULARITY]), PROFIT: NORMAL_PROFIT}
+            return {ACTION: ACTION_SWAP, ARGUMENTS: random_swap_tokens(params[SWAP], s[POOL], s[POPULARITY]), USERS: NORMAL}
         else:
             return {}
     return user_policy

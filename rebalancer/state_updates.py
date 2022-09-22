@@ -1,5 +1,5 @@
 from rebalancer.actions import swap, provide_liquidity, remove_liquidity, rebalance, compensate
-from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, HEDGING, PROFIT, ARGUMENTS, POOL, POPULARITY, SWAP, TRADING_VOLUME, MAX_HISTORY, TIMESTAMP, POPULARITY_CACHE, UPDATE_INTERVAL
+from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, HEDGING, USERS, ARGUMENTS, POOL, POPULARITY, TRADING_VOLUME, MAX_HISTORY, TIMESTAMP, POPULARITY_CACHE, UPDATE_INTERVAL, SWAP
 from rebalancer import formulas
 from rebalancer.policies import SWAP_MEAN
 from rebalancer.model import VALUE_PER_TOKEN, Time
@@ -63,21 +63,21 @@ def get_timestamp_update(tx_per_day):
     return timestamp_update
 
 
-def profit_update(_g, step, sH, s, input):
-    profit = copy.deepcopy(s[PROFIT])
+def users_update(_g, step, sH, s, input):
+    users = copy.deepcopy(s[USERS])
     if input[ACTION] is ACTION_SWAP:
         a_in, t_in, t_out = input[ARGUMENTS]
         t_in = s[POOL][t_in]
         t_out = s[POOL][t_out]
-        user_type = input[PROFIT]
-        profit[user_type][0] += 1
+        user_type = input[USERS]
+        users[user_type].tx_count += 1
         diff = formulas.get_price_impact_loss(
             a_in, t_in, t_out)
         if diff < 0:
-            profit[user_type][1] += diff
+            users[user_type].profit += diff
         else:
-            profit[user_type][2] += diff
-    return (PROFIT, profit)
+            users[user_type].loss += diff
+    return (USERS, users)
 
 
 def get_popularity_update(historical_data):

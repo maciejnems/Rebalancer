@@ -1,6 +1,6 @@
-from rebalancer.model import Time, Token, VALUE_PER_TOKEN, TX_PER_DAY
+from rebalancer.model import Time, Token, User, VALUE_PER_TOKEN, TX_PER_DAY
 from rebalancer.policies import SWAP_MEAN
-from rebalancer.names import TIMESTAMP, POOL, PROFIT, ARBITRAGEUR_PROFIT, NORMAL_PROFIT, POPULARITY, TRADING_VOLUME, MAX_HISTORY
+from rebalancer.names import TIMESTAMP, POOL, USERS, ARBITRAGEUR, NORMAL, POPULARITY, TRADING_VOLUME, MAX_HISTORY
 from rebalancer import formulas
 
 
@@ -29,9 +29,9 @@ def get_state_from_historical_data(historical_data, tx_per_day):
     genesis_state = {
         TIMESTAMP: Time(0, 0, tx_per_day[0]),
         POOL: tokens,
-        PROFIT: {
-            ARBITRAGEUR_PROFIT: [0, 0, 0],
-            NORMAL_PROFIT: [0, 0, 0],
+        USERS: {
+            ARBITRAGEUR: User(0, 0, 0),
+            NORMAL: User(0, 0, 0)
         },
         MAX_HISTORY: 10,
         POPULARITY: popularity,
