@@ -11,7 +11,7 @@ class TestActions(TestCase):
         a_in = 45.254551570268475
 
         new_state = actions.swap(tokens, {}, a_in, "b", "a")
-        self.assertAlmostEqual(new_state["a"].balance, 600 + 50 * formulas.SWAP_FEE)
+        self.assertAlmostEqual(new_state["a"].balance, 600)
         self.assertAlmostEqual(new_state["b"].balance, 400)
 
     def test_provide_liquidity(self):

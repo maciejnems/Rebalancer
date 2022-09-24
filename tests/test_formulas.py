@@ -85,9 +85,9 @@ class TestFormulas(TestCase):
         wanted_target_ratio = formulas.wanted_target_ratio(
             tokens, trading_volumes)
 
-        self.assertAlmostEqual(wanted_target_ratio["a"], 0.3413795387586285)
-        self.assertAlmostEqual(wanted_target_ratio["b"], 0.2425721937893485)
-        self.assertAlmostEqual(wanted_target_ratio["c"], 0.4160482674520231)
+        self.assertAlmostEqual(wanted_target_ratio["a"], 0.3550510257216822)
+        self.assertAlmostEqual(wanted_target_ratio["b"], 0.28989794855663564)
+        self.assertAlmostEqual(wanted_target_ratio["c"], 0.3550510257216822)
 
     def test_new_target_ratios(self):
         tokens = {"a": Token("a", 400, 0.5, 1.0),
