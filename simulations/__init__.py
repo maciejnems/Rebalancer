@@ -50,8 +50,8 @@ historical_data = utils.get_historical_data(
 #     tokens, "2021-07-01 00:00:00 UTC", "2022-09-01 00:00:00 UTC")
 
 # Short - is for testing
-historical_data = utils.get_historical_data(
-    tokens, "2022-08-22 00:00:00 UTC", "2022-08-25 00:00:00 UTC")
+# historical_data = utils.get_historical_data(
+#     tokens, "2022-08-20 00:00:00 UTC", "2022-08-25 00:00:00 UTC")
 
 days = len(next(iter(historical_data.values()))) - 1
 blocks = TX_PER_DAY * days
@@ -75,10 +75,10 @@ print("blocks:", blocks)
 
 
 ### Used for tests with hedging
-# simulate_equal_target_ratios.append(
-#     dex_exp, blocks, {UPDATE_INTERVAL: [None], POPULARITY_CACHE: [None], HEDGING: [True], SWAP: [5000]}, historical_data, trading_volumes)
-# simulate_rebalancing_target_ratios.append(
-#     dex_exp, blocks, {UPDATE_INTERVAL: [1], POPULARITY_CACHE: [7], HEDGING: [True], SWAP: [5000]}, historical_data, trading_volumes)
+simulate_equal_target_ratios.append(
+    dex_exp, blocks, {UPDATE_INTERVAL: [None], POPULARITY_CACHE: [None], HEDGING: [True], SWAP: [5000]}, historical_data, trading_volumes)
+simulate_rebalancing_target_ratios.append(
+    dex_exp, blocks, {UPDATE_INTERVAL: [1], POPULARITY_CACHE: [7], HEDGING: [True], SWAP: [5000]}, historical_data, trading_volumes)
 
 ### Simulation by trading value
 # for i in range(1, 21):

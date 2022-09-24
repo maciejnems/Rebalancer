@@ -1,7 +1,6 @@
 from rebalancer.actions import swap, provide_liquidity, remove_liquidity, rebalance, compensate
 from rebalancer.names import ACTION_SWAP, ACTION_PROVIDE_LIQUIDITY, ACTION_REMOVE_LIQUIDITY, ACTION, HEDGING, USERS, ARGUMENTS, POOL, POPULARITY, TRADING_VOLUME, MAX_HISTORY, TIMESTAMP, POPULARITY_CACHE, UPDATE_INTERVAL, SWAP
 from rebalancer import formulas
-from rebalancer.policies import SWAP_MEAN
 from rebalancer.model import VALUE_PER_TOKEN, Time
 import numpy as np
 import math

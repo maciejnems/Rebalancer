@@ -1,5 +1,4 @@
-from rebalancer.model import Time, Token, User, VALUE_PER_TOKEN, TX_PER_DAY
-from rebalancer.policies import SWAP_MEAN
+from rebalancer.model import Time, Token, User, VALUE_PER_TOKEN
 from rebalancer.names import TIMESTAMP, POOL, USERS, ARBITRAGEUR, NORMAL, POPULARITY, TRADING_VOLUME, MAX_HISTORY
 from rebalancer import formulas
 
