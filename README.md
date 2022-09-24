@@ -22,3 +22,6 @@ Simply run
 ```
 pytest
 ```
+
+## Results
+Plots for results of simulation can be found in the `results` folder.
