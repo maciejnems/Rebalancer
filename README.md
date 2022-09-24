@@ -1,5 +1,5 @@
 # Rebalancer
-This repository contains a proof of concept implementation of the Rebalancer protocol. It utilizes the CadCAD framework to simulate the execution of this protocol based on historical data downloaded from Coingecko.
+This repository contains a proof of concept implementation of the Rebalancer protocol. It utilizes the CadCAD framework to simulate the execution of this protocol based on historical data downloaded from Coingecko (can be found in `data` folder).
 
 This is a part of my Master of Science thesis for the Theoretical Computer Science Department of Jagiellonian University
 
@@ -7,6 +7,13 @@ This is a part of my Master of Science thesis for the Theoretical Computer Scien
 This project supports Python 3.8. Unfortunately, it does not work with any higher version of Python, as CadCAD library is not compatible with them.
 Because of that, we recommend the usage of Conda, to prepare a python environment.
 To run the project first install Python requirements in the `requirements.txt` file.
+
+So example usage with conda would be:
+```
+conda create --name rebalancer python=3.8
+conda activate rebalancer
+conda install --file requirements.txt 
+```
 
 ## Running simulation
 To execute simulations run:
