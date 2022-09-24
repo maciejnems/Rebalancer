@@ -7,9 +7,9 @@ def aggregator(a, b):
     return a+b
 
 
-def append(experiment, blocks, params, historical_data, tx_per_day):
+def append(experiment, blocks, params, historical_data, tx_per_day, target_ratios=None):
     user_record, genesis_state = genesis.get_state_from_historical_data(
-        historical_data, tx_per_day)
+        historical_data, tx_per_day, target_ratios=target_ratios)
 
     sim_config = config_sim(
         {

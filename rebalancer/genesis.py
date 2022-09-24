@@ -4,12 +4,13 @@ from rebalancer.names import TIMESTAMP, POOL, USERS, ARBITRAGEUR, NORMAL, POPULA
 from rebalancer import formulas
 
 
-def get_state_from_historical_data(historical_data, tx_per_day):
-    # value_sum = sum([d.iloc[0].market_cap for d in historical_data.values()])
-    # tokens = {t: Token(t, VALUE_PER_TOKEN / d.iloc[0].price,
-    #                    d.iloc[0].market_cap / value_sum, d.iloc[0].price) for t, d in historical_data.items()}
-    tokens = {t: Token(t, VALUE_PER_TOKEN / d.iloc[0].price,
-                       1/len(historical_data), d.iloc[0].price) for t, d in historical_data.items()}
+def get_state_from_historical_data(historical_data, tx_per_day, target_ratios=None):
+    if target_ratios == None:
+        tokens = {t: Token(t, VALUE_PER_TOKEN / d.iloc[0].price,
+                           1/len(historical_data), d.iloc[0].price) for t, d in historical_data.items()}
+    else:
+        tokens = {t: Token(t, VALUE_PER_TOKEN / d.iloc[0].price,
+                           target_ratios[t], d.iloc[0].price) for t, d in historical_data.items()}
     target_balances = formulas.target_balances(tokens)
     for t, tr in target_balances.items():
         tokens[t].balance = tr
